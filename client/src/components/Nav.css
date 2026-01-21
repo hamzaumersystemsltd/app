@@ -1,0 +1,146 @@
+
+/* ===== Sticky top navigation (light surface, subtle border & shadow) ===== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #ffffff;
+  border-bottom: 1px solid #e6e9ef;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.04);
+}
+
+/* ===== Centered content container ===== */
+.nav-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+/* ===== Brand / logo ===== */
+.brand {
+  margin-right: auto;
+  font-weight: 800;
+  font-size: 16px;
+  color: #111827; /* slate-900 */
+  letter-spacing: 0.2px;
+  text-decoration: none; /* works for <a> or <div> */
+}
+
+/* ===== Link list ===== */
+.links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== Link look (neutral by default; dark on hover/active) ===== */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #374151;         /* gray-700 */
+  text-decoration: none;
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-link:hover {
+  background: #f3f4f6;   /* gray-100 */
+  color: #111827;        /* slate-900 */
+}
+
+.nav-link.active {
+  background: #e5e7eb;   /* gray-200 */
+  color: #111827;
+  font-weight: 600;
+}
+
+/* ===== Primary action (consistent with app buttons) ===== */
+.nav-btn,
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;  /* app primary: dark */
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+  text-decoration: none; /* in case it's an <a> */
+}
+
+.nav-btn:hover,
+.logout-btn:hover {
+  background: #1f2937;
+}
+
+.nav-btn:active,
+.logout-btn:active {
+  transform: translateY(1px);
+}
+
+/* ===== Optional: Use a subtle "danger" variant for Logout ===== */
+.logout-btn.danger {
+  background: #ef4444;   /* red-500 */
+}
+.logout-btn.danger:hover {
+  background: #dc2626;   /* red-600 */
+}
+
+/* ===== Avatar / user chip (optional) ===== */
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f4f6; /* gray-100 */
+  color: #374151;
+  font-size: 13px;
+}
+
+.user-chip .avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+/* ===== Divider (optional between links and actions) ===== */
+.nav-divider {
+  width: 1px;
+  height: 22px;
+  background: #e6e9ef;
+  margin: 0 4px;
+}
+
+/* ===== Responsive: small screens ===== */
+@media (max-width: 520px) {
+  .nav-inner {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .links {
+    gap: 6px;
+  }
+
+  .nav-link,
+  .nav-btn,
+  .logout-btn {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+
+  .brand {
+    font-size: 15px;
+  }
+}

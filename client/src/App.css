@@ -1,0 +1,123 @@
+
+/* ===== App background ===== */
+.app-page {
+  min-height: calc(100vh - 56px); /* accounts for nav height */
+  background: #f5f7fb;           /* same as home/login */
+  padding: 24px 16px;
+}
+
+/* ===== Centered container ===== */
+.app-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ===== Main app surface (card-like) ===== */
+.app-card {
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+}
+
+/* ===== Page title ===== */
+.app-title {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* ===== Subtitle / helper text ===== */
+.app-subtitle {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ===== Main content ===== */
+.app-content {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* ===== Section blocks ===== */
+.app-section {
+  padding: 16px 0;
+  border-top: 1px solid #e6e9ef;
+}
+
+.app-section:first-child {
+  border-top: none;
+}
+
+/* ===== Action row ===== */
+.app-actions {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ===== Primary button (shared style) ===== */
+.button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.button:hover {
+  background: #1f2937;
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+/* ===== Secondary button ===== */
+.button.secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.button.secondary:hover {
+  background: #d1d5db;
+}
+
+/* ===== Status badge ===== */
+.app-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: #e5e7eb;
+  color: #374151;
+  border-radius: 999px;
+}
+
+/* ===== Empty state ===== */
+.app-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+  .app-card {
+    padding: 20px;
+  }
+
+  .app-title {
+    font-size: 22px;
+  }
+}

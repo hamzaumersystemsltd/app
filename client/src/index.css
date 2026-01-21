@@ -1,0 +1,193 @@
+
+/* ===============================
+   Global: Unified App Theme
+   =============================== */
+
+/* --- Design tokens (optional but helpful) --- */
+:root {
+  /* Colors */
+  --bg-page: #f5f7fb;
+  --surface: #ffffff;
+  --border: #e6e9ef;
+  --text-strong: #111827; /* slate-900 */
+  --text: #374151;        /* gray-700 */
+  --muted: #6b7280;       /* gray-500 */
+  --muted-2: #9ca3af;     /* gray-400 */
+  --primary: #111827;
+  --primary-hover: #1f2937;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+
+  /* Radii & spacing */
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --gap: 12px;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --size-sm: 12px;
+  --size-md: 14px;
+  --size-lg: 22px;
+  --size-xl: 24px;
+  --line: 1.6;
+}
+
+/* --- CSS Reset-ish & base layout --- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-page);
+  color: var(--text);
+  font: 400 14px/var(--line) var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Make the app feel consistent with centered containers */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* --- Headings --- */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-strong);
+  margin: 0 0 8px;
+  line-height: 1.25;
+}
+
+h1 { font-size: var(--size-xl); font-weight: 800; }
+h2 { font-size: var(--size-lg); font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+
+/* --- Paragraphs / helpers --- */
+p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+
+/* --- Links --- */
+a {
+  color: var(--text-strong);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+a:hover { text-decoration: underline; }
+
+/* --- Buttons (primary & secondary) --- */
+button,
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--size-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease, opacity 0.15s ease;
+}
+button:hover,
+.button:hover { background: var(--primary-hover); }
+button:active,
+.button:active { transform: translateY(1px); }
+button:disabled,
+.button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Secondary button */
+.button.secondary {
+  background: #e5e7eb;
+  color: var(--text-strong);
+}
+.button.secondary:hover {
+  background: #d1d5db;
+}
+
+/* --- Inputs --- */
+input, select, textarea {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--text-strong);
+  font-size: var(--size-md);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-2);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--text-strong);
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+/* --- Cards / surfaces (match Home/App/Forgot) --- */
+.card,
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+/* Section separations inside cards */
+.section { padding: 16px 0; border-top: 1px solid var(--border); }
+.section:first-child { border-top: 0; }
+
+/* --- Utility layout helpers --- */
+.centered {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 56px); /* if nav exists */
+  padding: 16px;
+}
+
+.stack { display: grid; gap: var(--gap); }
+.row { display: flex; align-items: center; gap: var(--gap); flex-wrap: wrap; }
+.row.center { justify-content: center; }
+
+/* --- Badges --- */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #e5e7eb;
+  color: var(--text);
+  border-radius: 999px;
+  font-size: var(--size-sm);
+}
+
+/* --- Messages --- */
+.message {
+  font-size: 12px;
+  margin-top: 8px;
+  color: #dc2626; /* red-600 */
+}
+
+/* --- Responsive tweaks --- */
+@media (max-width: 640px) {
+  .card, .surface { padding: 20px; }
+  .container { padding: 20px 12px; }
+  h1 { font-size: 22px; }
+}

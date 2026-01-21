@@ -1,0 +1,133 @@
+
+/* ===== Page layout ===== */
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #f5f7fb; /* same as home & dialog */
+  padding: 16px;
+}
+
+/* ===== Card container ===== */
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+/* ===== Heading ===== */
+.login-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827; /* slate-900 */
+  text-align: center;
+}
+
+/* ===== Subtitle ===== */
+.login-subtitle {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: #6b7280; /* gray-500 */
+  text-align: center;
+}
+
+/* ===== Form ===== */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151; /* gray-700 */
+}
+
+.input {
+  width: 93%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: #9ca3af; /* gray-400 */
+}
+
+.input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+/* ===== Primary button (same as Home) ===== */
+.button {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #111827; /* dark */
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: #1f2937;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Error / info message ===== */
+.message {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #dc2626; /* red-600 */
+  text-align: center;
+}
+
+/* ===== Helper row ===== */
+.helper-row {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.helper-row a {
+  color: #111827;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.helper-row a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px;
+  }
+}

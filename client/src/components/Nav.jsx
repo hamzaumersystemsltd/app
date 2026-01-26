@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 export default function Nav() {
   const { pathname } = useLocation();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -18,7 +18,7 @@ export default function Nav() {
               onClick={() => {
                 closeToast();
                 logout();
-                toast.success("Logged out successfully 👋", { autoClose: 1500 });
+                toast.success("Logged out successfully.", { autoClose: 1500 });
                 navigate("/login", { replace: true });
               }}
               style={{
@@ -59,28 +59,28 @@ export default function Nav() {
         {/* Brand */}
         <Link
           className="brand nav-link"
-          to={isAuthenticated ? "/" : "/login"}
+          to={!isAuthenticated ? "/login" : "/"}
           style={{ padding: 0, background: "transparent" }}
         >
           MERN Project
         </Link>
 
-        {/* Auth-aware links */}
         <div className="links">
           {!isAuthenticated ? (
             <>
               <NavLink
                 to="/login"
                 className={({ isActive }) =>
-                  `nav-link ${isActive || pathname === "/login" ? "active" : ""}`
+                  `nav-link ${isActive ? "active" : ""}`
                 }
               >
                 Login
               </NavLink>
+
               <NavLink
                 to="/register"
                 className={({ isActive }) =>
-                  `nav-link ${isActive || pathname === "/register" ? "active" : ""}`
+                  `nav-link ${isActive ? "active" : ""}`
                 }
               >
                 Register
@@ -88,15 +88,41 @@ export default function Nav() {
             </>
           ) : (
             <>
+              {/* Home */}
               <NavLink
                 to="/"
-                className={({ isActive }) =>
-                  `nav-link ${isActive || pathname === "/" ? "active" : ""}`
-                }
                 end
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? "active" : ""}`
+                }
               >
                 Home
               </NavLink>
+
+              {/* ✅ Profile (all users) */}
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? "active" : ""}`
+                }
+              >
+                Profile
+              </NavLink>
+
+              {/* ✅ Admin only */}
+              {/* {isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    `nav-link ${
+                      isActive || pathname.startsWith("/admin") ? "active" : ""
+                    }`
+                  }
+                >
+                  Admin
+                </NavLink>
+              )} */}
+
               <button className="logout-btn" onClick={handleLogout}>
                 Logout
               </button>

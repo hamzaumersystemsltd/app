@@ -1,7 +1,7 @@
 
 /* Page layout */
 .home-page {
-  min-height: 100vh;
+  min-height: 85vh;
   display: grid;
   place-items: center;
   background: #f5f7fb; /* light background to match other pages */

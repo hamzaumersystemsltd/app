@@ -147,3 +147,16 @@
 #gender {
   width: 100%;
 }
+
+/* Chrome, Safari, Edge, Opera */
+#age::-webkit-outer-spin-button,
+#age::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+#age {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}

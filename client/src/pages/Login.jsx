@@ -9,7 +9,10 @@ import { useState } from "react";
 import ForgotPasswordDialog from "../components/ForgotPasswordDialog.jsx";
 
 const LoginSchema = Yup.object({
-  email: Yup.string().trim().email("Enter a valid email address").required("Email is required"),
+  email: Yup.string()
+    .trim()
+    .email("Enter a valid email address")
+    .required("Email is required"),
   password: Yup.string().required("Password is required"),
 });
 
@@ -34,16 +37,19 @@ export default function Login() {
                 password: values.password,
               });
 
-              // Save token
-              login(res.data.token);
+              // ✅ Store token + user (role included)
+              login(res.data.token, res.data.user);
 
-              // Success toast, then navigate
-              toast.success("Login successful ✅", {
-                onClose: () => navigate("/", { replace: true }),
+              toast.success("Login successful.", {
                 autoClose: 2000,
+                onClose: () => {
+                  navigate("/", { replace: true });
+                },
               });
             } catch (e) {
-              toast.error(e.response?.data?.message || "❌ Invalid email or password");
+              toast.error(
+                e.response?.data?.message || "Invalid email or password."
+              );
             } finally {
               setSubmitting(false);
             }
@@ -53,13 +59,14 @@ export default function Login() {
             <Form>
               {/* Email */}
               <div className="form-group">
-                <label className="label" htmlFor="email">Email</label>
+                <label className="label" htmlFor="email">
+                  Email
+                </label>
                 <Field
                   id="email"
                   name="email"
                   type="email"
                   className="input"
-                  placeholder="e.g. hamza@example.com"
                   autoComplete="email"
                   inputMode="email"
                 />
@@ -68,13 +75,14 @@ export default function Login() {
 
               {/* Password */}
               <div className="form-group">
-                <label className="label" htmlFor="password">Password</label>
+                <label className="label" htmlFor="password">
+                  Password
+                </label>
                 <Field
                   id="password"
                   name="password"
                   type="password"
                   className="input"
-                  placeholder="Your password"
                   autoComplete="current-password"
                 />
                 <ErrorMessage name="password" component="div" className="message" />
@@ -102,7 +110,9 @@ export default function Login() {
         </div>
       </div>
 
-      {showForgot && <ForgotPasswordDialog onClose={() => setShowForgot(false)} />}
+      {showForgot && (
+        <ForgotPasswordDialog onClose={() => setShowForgot(false)} />
+      )}
     </div>
   );
 }

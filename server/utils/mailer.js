@@ -10,7 +10,7 @@ const SMTP_PASS = process.env.SMTP_PASS;
 export const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
-  secure: false, // Mailtrap uses 2525 with STARTTLS (secure: false)
+  secure: false,
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASS,

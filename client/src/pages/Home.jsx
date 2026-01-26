@@ -17,7 +17,7 @@ export default function Home() {
               onClick={() => {
                 closeToast();
                 logout();
-                toast.success("Logged out successfully 👋", { autoClose: 1500 });
+                toast.success("Logged out successfully.", { autoClose: 1500 });
                 navigate("/login", { replace: true });
               }}
               style={{

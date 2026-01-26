@@ -4,7 +4,6 @@ import Otp from "../models/Otp.js";
 import User from "../models/User.js";
 import { generateSixDigit, hashCode, compareCode } from "../utils/otp.js";
 import { sendOtpEmail } from "../utils/mailer.js";
-// import mongoose from "mongoose";
 
 function normalizeEmail(email) {
   return String(email || "").trim().toLowerCase();
@@ -124,13 +123,9 @@ export async function resetPassword(req, res) {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: "User not found" });
 
-    // console.log("Connected DB:", mongoose.connection.name);
-    // console.log("Resetting user id:", user._id.toString());
-
     const hash = await bcrypt.hash(String(newPassword), 10);
     user.password = hash;
     await user.save();
-    // console.log("Updated at:", user.updatedAt);
 
     return res.json({ message: "Password reset successful" });
   } catch (err) {

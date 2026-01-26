@@ -2,16 +2,26 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import Home from "./pages/Home.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 import Nav from "./components/Nav.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+/* ✅ Authenticated users only */
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
+/* ✅ Only admins allowed */
+function AdminRoute({ children }) {
+  const { isAdmin } = useAuth();
+  return isAdmin ? children : <Navigate to="/" replace />;
+}
+
+/* ✅ Block login/register for logged-in users */
 function PublicOnlyRoute({ children }) {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <Navigate to="/" replace /> : children;
@@ -22,7 +32,6 @@ export default function App() {
     <Router>
       <Nav />
 
-      {/* ✅ Toasts work globally */}
       <ToastContainer
         position="top-right"
         autoClose={4000}
@@ -35,6 +44,7 @@ export default function App() {
       />
 
       <Routes>
+        {/* ✅ Home */}
         <Route
           path="/"
           element={
@@ -43,7 +53,30 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        
+        {/* ✅ User Profile */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          }
+        />
 
+        {/* ✅ Admin Profile */}
+        {/* <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        /> */}
+
+        {/* ✅ Public */}
         <Route
           path="/login"
           element={
@@ -62,6 +95,7 @@ export default function App() {
           }
         />
 
+        {/* ✅ Fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

@@ -147,7 +147,7 @@ export default function Register() {
               toast.success(
                 ({ closeToast }) => (
                   <div>
-                    <strong>Registration successful ✅</strong>
+                    <strong>Registration successful.</strong>
                     <br />
                     <button
                       onClick={() => {
@@ -175,7 +175,7 @@ export default function Register() {
               setPasswordValue("");
             } catch (e) {
               // ✅ ERROR TOAST
-              toast.error(e.response?.data?.message || "❌ Error registering");
+              toast.error(e.response?.data?.message || "Error registering.");
             } finally {
               setSubmitting(false);
             }
@@ -190,7 +190,6 @@ export default function Register() {
                   id="firstName"
                   name="firstName"
                   className="input"
-                  placeholder="e.g. Hamza"
                   autoComplete="given-name"
                 />
                 <ErrorMessage name="firstName" component="div" className="message" />
@@ -203,7 +202,6 @@ export default function Register() {
                   id="lastName"
                   name="lastName"
                   className="input"
-                  placeholder="e.g. Umer"
                   autoComplete="family-name"
                 />
                 <ErrorMessage name="lastName" component="div" className="message" />
@@ -217,7 +215,6 @@ export default function Register() {
                   name="email"
                   type="email"
                   className="input"
-                  placeholder="e.g. hamza@example.com"
                   autoComplete="email"
                   inputMode="email"
                 />
@@ -243,7 +240,6 @@ export default function Register() {
                   name="age"
                   type="number"
                   className="input"
-                  placeholder="e.g. 20"
                   min="13"
                   max="120"
                   inputMode="numeric"
@@ -263,7 +259,6 @@ export default function Register() {
                         id="password"
                         type="password"
                         className="input"
-                        placeholder="Choose a strong password"
                         autoComplete="new-password"
                         {...field}
                         onChange={(e) => {
@@ -296,7 +291,6 @@ export default function Register() {
                   name="confirmPassword"
                   type="password"
                   className="input"
-                  placeholder="Re-enter your password"
                   autoComplete="new-password"
                 />
                 <ErrorMessage name="confirmPassword" component="div" className="message" />

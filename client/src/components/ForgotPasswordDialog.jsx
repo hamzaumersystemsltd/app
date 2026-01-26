@@ -147,7 +147,6 @@ export default function ForgotPasswordDialog({ onClose }) {
                     name="email"
                     type="email"
                     className="input"
-                    placeholder="e.g. hamza@example.com"
                     autoComplete="email"
                     inputMode="email"
                   />
@@ -194,7 +193,6 @@ export default function ForgotPasswordDialog({ onClose }) {
                       type="text"
                       inputMode="numeric"
                       className="input"
-                      placeholder="Enter 6-digit code"
                     />
                     <ErrorMessage name="code" component="div" className="message" />
                   </div>
@@ -272,7 +270,6 @@ export default function ForgotPasswordDialog({ onClose }) {
                           id="fp-new"
                           type="password"
                           className="input"
-                          placeholder="New password"
                           autoComplete="new-password"
                           {...field}
                           onChange={(e) => {
@@ -305,7 +302,6 @@ export default function ForgotPasswordDialog({ onClose }) {
                     name="confirmPassword"
                     type="password"
                     className="input"
-                    placeholder="Confirm password"
                     autoComplete="new-password"
                   />
                   <ErrorMessage name="confirmPassword" component="div" className="message" />

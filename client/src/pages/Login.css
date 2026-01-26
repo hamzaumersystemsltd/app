@@ -1,7 +1,6 @@
-
 /* ===== Page layout ===== */
 .login-page {
-  min-height: 100vh;
+  min-height: 85vh;
   display: grid;
   place-items: center;
   background: #f5f7fb; /* same as home & dialog */

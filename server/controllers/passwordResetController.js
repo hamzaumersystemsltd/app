@@ -89,7 +89,7 @@ export async function verifyOtpCode(req, res) {
     const resetToken = jwt.sign(
       { email, purpose: "password_reset" },
       process.env.JWT_SECRET,
-      { expiresIn: "10m" }
+      { expiresIn: "5m" }
     );
 
     await Otp.deleteMany({ email }); // remove OTP after successful verify

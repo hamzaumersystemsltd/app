@@ -2,11 +2,11 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import "./Login.css";
 import { toast } from "react-toastify";
 import { useState } from "react";
-import ForgotPasswordDialog from "../components/ForgotPasswordDialog.jsx";
+import ForgotPasswordDialog from "../../components/ForgotPassword/ForgotPasswordDialog.jsx";
 
 const LoginSchema = Yup.object({
   email: Yup.string()
@@ -42,9 +42,6 @@ export default function Login() {
 
               toast.success("Login successful.", {
                 autoClose: 2000,
-                onClose: () => {
-                  navigate("/", { replace: true });
-                },
               });
             } catch (e) {
               toast.error(

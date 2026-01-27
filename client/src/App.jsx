@@ -1,31 +1,18 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Register from "./pages/Register.jsx";
-import Login from "./pages/Login.jsx";
-import Home from "./pages/Home.jsx";
-import AdminDashboard from "./pages/AdminDashboard.jsx";
-import UserProfile from "./pages/UserProfile.jsx";
-import Nav from "./components/Nav.jsx";
-import { useAuth } from "./context/AuthContext.jsx";
+import AdminRoute from "./components/Routes/AdminRoute.jsx";
+import ProtectedRoute from "./components/Routes/ProtectedRoute.jsx";
+import PublicRoute from "./components/Routes/PublicRoute.jsx";
+import Register from "./pages/Register/Register.jsx";
+import Login from "./pages/Login/Login.jsx";
+import Home from "./pages/Home/Home.jsx";
+import UserProfile from "./pages/UserProfile/UserProfile.jsx";
+import Nav from "./components/Nav/Nav.jsx";
 import { ToastContainer } from "react-toastify";
+import InventoryLayout from "./pages/inventory/InventoryLayout.jsx";
+import AddInventory from "./pages/inventory/AddInventory.jsx";
+import PurchaseInvoice from "./pages/inventory/PurchaseInvoice.jsx";
+import InventoryList from "./pages/inventory/InventoryList.jsx";
 import "react-toastify/dist/ReactToastify.css";
-
-/* ✅ Authenticated users only */
-function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
-}
-
-/* ✅ Only admins allowed */
-function AdminRoute({ children }) {
-  const { isAdmin } = useAuth();
-  return isAdmin ? children : <Navigate to="/" replace />;
-}
-
-/* ✅ Block login/register for logged-in users */
-function PublicOnlyRoute({ children }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Navigate to="/" replace /> : children;
-}
 
 export default function App() {
   return (
@@ -33,13 +20,9 @@ export default function App() {
       <Nav />
 
       <ToastContainer
-        position="top-right"
+        position="bottom-right"
         autoClose={4000}
-        hideProgressBar={false}
         newestOnTop
-        closeOnClick
-        pauseOnHover
-        draggable
         theme="colored"
       />
 
@@ -53,7 +36,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        
+
         {/* ✅ User Profile */}
         <Route
           path="/profile"
@@ -64,34 +47,38 @@ export default function App() {
           }
         />
 
-        {/* ✅ Admin Profile */}
-        {/* <Route
-          path="/admin"
+        {/* ✅ ADMIN NESTED ROUTES */}
+        <Route
+          path="/inventory"
           element={
             <ProtectedRoute>
               <AdminRoute>
-                <AdminDashboard />
+                <InventoryLayout />
               </AdminRoute>
             </ProtectedRoute>
           }
-        /> */}
+        >
+          <Route path="add-inventory" element={<AddInventory />} />
+          <Route path="purchase-invoice" element={<PurchaseInvoice />} />
+          <Route path="inventory-list" element={<InventoryList />} />
+        </Route>
 
         {/* ✅ Public */}
         <Route
           path="/login"
           element={
-            <PublicOnlyRoute>
+            <PublicRoute>
               <Login />
-            </PublicOnlyRoute>
+            </PublicRoute>
           }
         />
 
         <Route
           path="/register"
           element={
-            <PublicOnlyRoute>
+            <PublicRoute>
               <Register />
-            </PublicOnlyRoute>
+            </PublicRoute>
           }
         />
 

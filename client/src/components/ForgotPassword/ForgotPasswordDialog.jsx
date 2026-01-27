@@ -7,6 +7,14 @@ import "./ForgotPasswordDialog.css";
 
 const passwordStrongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 
+function formatMinutesSeconds(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (mins <= 0) return `${secs}s`;
+  if (secs === 0) return `${mins}m`;
+  return `${mins}m ${secs}s`;
+}
+
 function evaluatePasswordStrength(pw) {
   if (!pw) {
     return { score: 0, label: "Very Weak", color: "#d9534f", width: "0%" };
@@ -129,7 +137,7 @@ export default function ForgotPasswordDialog({ onClose }) {
                 const retry = e.response?.data?.retryAfter;
                 if (retry) {
                   setRetryAfter(retry);
-                  toast.warn(`Code already sent. Try again in ${retry} seconds.`);
+                  toast.warn(`Code already sent. Try again in ${formatMinutesSeconds(retry)}.`);
                 } else {
                   toast.error(e.response?.data?.message || "Unable to send code");
                 }
@@ -209,7 +217,7 @@ export default function ForgotPasswordDialog({ onClose }) {
                           const retry = e.response?.data?.retryAfter;
                           if (retry) {
                             setRetryAfter(retry);
-                            toast.warn(`Code already sent. Try again in ${retry} seconds.`);
+                            toast.warn(`Code already sent. Try again in ${formatMinutesSeconds(retry)}.`);
                           } else {
                             toast.error(e.response?.data?.message || "Unable to resend code");
                           }
@@ -217,7 +225,7 @@ export default function ForgotPasswordDialog({ onClose }) {
                       }}
                       disabled={retryAfter > 0}
                     >
-                      {retryAfter > 0 ? `Resend in ${retryAfter}s` : "Resend code"}
+                      {retryAfter > 0 ? `Resend in ${formatMinutesSeconds(retryAfter)}` : "Resend code"}
                     </button>
 
                     <button className="button" type="submit" disabled={isSubmitting}>

@@ -1,12 +1,33 @@
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 import "./Nav.css";
 import { toast } from "react-toastify";
+import { useEffect, useRef, useState } from "react";
 
 export default function Nav() {
   const { pathname } = useLocation();
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // --- Dropdown state for Inventory
+  const [openInventory, setOpenInventory] = useState(false);
+  const inventoryRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (inventoryRef.current && !inventoryRef.current.contains(e.target)) {
+        setOpenInventory(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close dropdown when route changes
+  useEffect(() => {
+    setOpenInventory(false);
+  }, [pathname]);
 
   const handleLogout = () => {
     toast.info(
@@ -52,6 +73,9 @@ export default function Nav() {
       { autoClose: false }
     );
   };
+
+  const inventoryActive =
+    pathname.startsWith("/inventory");
 
   return (
     <header className="nav">
@@ -99,7 +123,7 @@ export default function Nav() {
                 Home
               </NavLink>
 
-              {/* ✅ Profile (all users) */}
+              {/* Profile (all users) */}
               <NavLink
                 to="/profile"
                 className={({ isActive }) =>
@@ -109,19 +133,63 @@ export default function Nav() {
                 Profile
               </NavLink>
 
-              {/* ✅ Admin only */}
-              {/* {isAdmin && (
-                <NavLink
-                  to="/admin"
-                  className={({ isActive }) =>
-                    `nav-link ${
-                      isActive || pathname.startsWith("/admin") ? "active" : ""
-                    }`
-                  }
-                >
-                  Admin
-                </NavLink>
-              )} */}
+              {/* Admin only */}
+              {isAdmin && (
+                <>
+                  {/* Inventory as dropdown */}
+                  <div
+                    className={`dropdown ${inventoryActive ? "active" : ""}`}
+                    ref={inventoryRef}
+                    onMouseEnter={() => setOpenInventory(true)}
+                    onMouseLeave={() => setOpenInventory(false)}
+                  >
+                    <button
+                      className="nav-link dropdown-toggle"
+                      aria-haspopup="true"
+                      aria-expanded={openInventory}
+                      onClick={() => setOpenInventory((o) => !o)}
+                    >
+                      Inventory
+                      <span className={`chevron ${openInventory ? "up" : "down"}`} />
+                    </button>
+
+                    <div
+                      className={`dropdown-menu ${openInventory ? "show" : ""}`}
+                      role="menu"
+                    >
+                      <NavLink
+                        to="/inventory/add-inventory"
+                        className={({ isActive }) =>
+                          `dropdown-item ${isActive ? "active" : ""}`
+                        }
+                        role="menuitem"
+                      >
+                        Add Inventory
+                      </NavLink>
+
+                      <NavLink
+                        to="/inventory/purchase-invoice"
+                        className={({ isActive }) =>
+                          `dropdown-item ${isActive ? "active" : ""}`
+                        }
+                        role="menuitem"
+                      >
+                        Purchase Invoice
+                      </NavLink>
+
+                      <NavLink
+                        to="/inventory/inventory-list"
+                        className={({ isActive }) =>
+                          `dropdown-item ${isActive ? "active" : ""}`
+                        }
+                        role="menuitem"
+                      >
+                        Inventory List
+                      </NavLink>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <button className="logout-btn" onClick={handleLogout}>
                 Logout

@@ -1,0 +1,182 @@
+/* ===== Page layout (matches register) ===== */
+.addinventory-page {
+  min-height: 85vh;
+  display: grid;
+  place-items: center;
+  background: #f5f7fb;
+  padding: 16px;
+}
+
+/* ===== Card container ===== */
+.addinventory-card {
+  width: 100%;
+  /* Wider than register to accommodate more fields; change to 380px if you want identical width */
+  max-width: 720px;
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+/* ===== Heading (matches register) ===== */
+.addinventory-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  text-align: center;
+}
+
+/* ===== Subtitle (matches register) ===== */
+.addinventory-subtitle {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* ===== Form ===== */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Inputs match register styling */
+.input {
+  width: 93%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+/* Select elements should span full width */
+.input.select,
+select.input {
+  width: 100%;
+}
+
+/* ===== Textarea (description) matches inputs but with flexible height ===== */
+textarea.input {
+  width: 93%;
+  min-height: 96px;
+  height: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 1.4;
+  resize: vertical; /* allow user to expand */
+}
+
+/* ===== Primary button (same as register) ===== */
+.button {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: #1f2937;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Optional secondary button (used for helper actions) */
+.button.secondary {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* ===== Error / info message (matches register) ===== */
+.message {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #dc2626;
+  text-align: center;
+}
+
+/* ===== Helper row (matches register) ===== */
+.helper-row {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* ===== Form row grid for multi-column sections ===== */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Optional: 2-column helper if you want certain rows to be two columns
+   Usage: <div className="form-row two">...</div> */
+.form-row.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* When the card is narrower or on mobile, stack fields */
+@media (max-width: 800px) {
+  .addinventory-card {
+    padding: 20px;
+  }
+  .form-row,
+  .form-row.two {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Remove number arrows (if you decide to use type=number) ===== */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ===== Date inputs should look consistent ===== */
+input[type="date"].input {
+  width: 93%;
+  height: 42px;
+}

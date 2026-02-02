@@ -1,0 +1,132 @@
+/* ===== Page Layout (same as Add Inventory) ===== */
+.viewinventory-page {
+  min-height: 85vh;
+  display: grid;
+  place-items: center;
+  background: #f5f7fb;
+  padding: 16px;
+}
+
+/* ===== Card container (same base as Add Inventory) ===== */
+.viewinventory-card {
+  width: 100%;
+  max-width: 720px;
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+/* ===== Heading ===== */
+.viewinventory-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  text-align: center;
+}
+
+/* ===== Subtitle ===== */
+.viewinventory-subtitle {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* ===== Section labels ===== */
+.view-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+/* ===== Field value styling ===== */
+.view-value {
+  font-size: 14px;
+  color: #111827;
+  background: #f9fafb;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* ===== Grid layout for details (3-column matching AddInventory form-row) ===== */
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.view-grid.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ===== Responsive breakpoints (same as AddInventory) ===== */
+@media (max-width: 800px) {
+  .view-grid,
+  .view-grid.two {
+    grid-template-columns: 1fr;
+  }
+  .viewinventory-card {
+    padding: 20px;
+  }
+}
+
+/* ===== Description box ===== */
+.view-description {
+  margin-top: 20px;
+}
+
+.view-description .view-value {
+  min-height: 80px;
+  line-height: 1.4;
+}
+
+/* ===== Footer (timestamps, created/updated info) ===== */
+.view-footer {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+  padding-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===== Buttons (same style as AddInventory but horizontal row) ===== */
+.view-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.button-view {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.button-view:hover {
+  background: #1f2937;
+}
+
+.button-view:active {
+  transform: translateY(1px);
+}
+
+.button-secondary {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.button-secondary:hover {
+  background: #e5e7eb;
+}

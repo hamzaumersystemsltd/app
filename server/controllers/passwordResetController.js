@@ -18,7 +18,7 @@ function secondsLeft(date, ttlSec = 300) {
 export async function requestPasswordReset(req, res) {
   try {
     const email = normalizeEmail(req.body.email);
-    if (!email) return res.status(400).json({ message: "Email is required" });
+    if (!email) return res.status(400).json({ message: "Email is required." });
 
     // Don't reveal whether the user exists
     const user = await User.findOne({ email });
@@ -54,7 +54,7 @@ export async function requestPasswordReset(req, res) {
     });
   } catch (err) {
     console.error("forgot-password error:", err);
-    return res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong." });
   }
 }
 
@@ -65,7 +65,7 @@ export async function verifyOtpCode(req, res) {
     const code = String(req.body.code || "").trim();
 
     if (!email || !code) {
-      return res.status(400).json({ message: "Email and code are required" });
+      return res.status(400).json({ message: "Email and code are required." });
     }
 
     const otp = await Otp.findOne({ email }).sort({ createdAt: -1 });
@@ -82,7 +82,7 @@ export async function verifyOtpCode(req, res) {
     if (!ok) {
       otp.attempts += 1;
       await otp.save();
-      return res.status(400).json({ message: "Invalid code" });
+      return res.status(400).json({ message: "Invalid code." });
     }
 
     // success → sign short-lived reset token
@@ -96,7 +96,7 @@ export async function verifyOtpCode(req, res) {
     return res.json({ resetToken });
   } catch (err) {
     console.error("verify-otp error:", err);
-    return res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong." });
   }
 }
 
@@ -105,31 +105,31 @@ export async function resetPassword(req, res) {
   try {
     const { resetToken, newPassword } = req.body;
     if (!resetToken || !newPassword) {
-      return res.status(400).json({ message: "Token and new password are required" });
+      return res.status(400).json({ message: "Token and new password are required." });
     }
 
     let payload;
     try {
       payload = jwt.verify(resetToken, process.env.JWT_SECRET);
     } catch {
-      return res.status(401).json({ message: "Invalid or expired token" });
+      return res.status(401).json({ message: "Invalid or expired token." });
     }
 
     if (payload.purpose !== "password_reset") {
-      return res.status(401).json({ message: "Invalid token purpose" });
+      return res.status(401).json({ message: "Invalid token purpose." });
     }
 
     const email = normalizeEmail(payload.email);
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "User not found." });
 
     const hash = await bcrypt.hash(String(newPassword), 10);
     user.password = hash;
     await user.save();
 
-    return res.json({ message: "Password reset successful" });
+    return res.json({ message: "Password reset successful." });
   } catch (err) {
     console.error("reset-password error:", err);
-    return res.status(500).json({ message: "Something went wrong" });
+    return res.status(500).json({ message: "Something went wrong." });
   }
 }

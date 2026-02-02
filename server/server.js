@@ -2,8 +2,9 @@ import "./config/env.js";
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
-import userRoutes from "./routes/userRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
+import inventoryRoutes from "./routes/inventory.js"
+// import userRoutes from "./routes/userRoutes.js";
+// import adminRoutes from "./routes/adminRoutes.js";
 import connectDB from "./config/db.js";
 
 const app = express();
@@ -17,9 +18,10 @@ connectDB();
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/inventory", inventoryRoutes);
+// app.use("/api/user", userRoutes);
+// app.use("/api/admin", adminRoutes);
 
 // Server start
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

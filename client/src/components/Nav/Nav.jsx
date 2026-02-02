@@ -168,16 +168,6 @@ export default function Nav() {
                       </NavLink>
 
                       <NavLink
-                        to="/inventory/purchase-invoice"
-                        className={({ isActive }) =>
-                          `dropdown-item ${isActive ? "active" : ""}`
-                        }
-                        role="menuitem"
-                      >
-                        Purchase Invoice
-                      </NavLink>
-
-                      <NavLink
                         to="/inventory/inventory-list"
                         className={({ isActive }) =>
                           `dropdown-item ${isActive ? "active" : ""}`
@@ -185,6 +175,16 @@ export default function Nav() {
                         role="menuitem"
                       >
                         Inventory List
+                      </NavLink>
+
+                      <NavLink
+                        to="/inventory/purchase-invoice"
+                        className={({ isActive }) =>
+                          `dropdown-item ${isActive ? "active" : ""}`
+                        }
+                        role="menuitem"
+                      >
+                        Purchase Invoice
                       </NavLink>
                     </div>
                   </div>

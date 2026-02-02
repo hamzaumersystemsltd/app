@@ -9,6 +9,8 @@ import UserProfile from "./pages/UserProfile/UserProfile.jsx";
 import Nav from "./components/Nav/Nav.jsx";
 import { ToastContainer } from "react-toastify";
 import InventoryLayout from "./pages/inventory/InventoryLayout.jsx";
+import EditInventory from "./pages/inventory/EditInventory.jsx";
+import ViewInventory from "./pages/inventory/ViewInventory.jsx";
 import AddInventory from "./pages/inventory/AddInventory.jsx";
 import PurchaseInvoice from "./pages/inventory/PurchaseInvoice.jsx";
 import InventoryList from "./pages/inventory/InventoryList.jsx";
@@ -59,8 +61,10 @@ export default function App() {
           }
         >
           <Route path="add-inventory" element={<AddInventory />} />
-          <Route path="purchase-invoice" element={<PurchaseInvoice />} />
           <Route path="inventory-list" element={<InventoryList />} />
+          <Route path="purchase-invoice" element={<PurchaseInvoice />} />
+          <Route path="edit/:id" element={<EditInventory />} />
+          <Route path="view/:id" element={<ViewInventory />} />
         </Route>
 
         {/* ✅ Public */}

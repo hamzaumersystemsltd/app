@@ -61,14 +61,14 @@ export const register = async (req, res) => {
     if (!passwordStrongRegex.test(password)) {
       return res.status(400).json({
         message:
-          "Password must be 8+ chars and include uppercase, lowercase, number, and special character",
+          "Password must be 8+ chars and include uppercase, lowercase, number, and special character.",
       });
     }
 
     // Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: "Email is already registered" });
+      return res.status(409).json({ message: "Email is already registered." });
     }
 
     // Hash password
@@ -87,13 +87,12 @@ export const register = async (req, res) => {
 
     await user.save();
 
-    return res.status(201).json({ message: "User registered successfully" });
+    return res.status(201).json({ message: "User registered successfully." });
 
   } catch (error) {
     if (error?.code === 11000) {
-      return res.status(409).json({ message: "Email is already registered" });
+      return res.status(409).json({ message: "Email is already registered." });
     }
-    console.error("Register error:", error);
     return res.status(500).json({ message: "Server error. Please try again." });
   }
 };
@@ -104,19 +103,19 @@ export const login = async (req, res) => {
     let { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+      return res.status(400).json({ message: "Email and password are required." });
     }
 
     email = String(email).trim().toLowerCase();
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(400).json({ message: "Invalid credentials." });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials." });
 
     if (!process.env.JWT_SECRET) {
-      return res.status(500).json({ message: "Server configuration error" });
+      return res.status(500).json({ message: "Server configuration error." });
     }
 
     const token = jwt.sign(

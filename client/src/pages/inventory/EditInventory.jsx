@@ -136,6 +136,7 @@ export default function EditInventory({ authToken }) {
           submitLabel="Update Item"
           enableReinitialize
           validateOnChange={false}
+          token={token}
         />
       </div>
     </div>

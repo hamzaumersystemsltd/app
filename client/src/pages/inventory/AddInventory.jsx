@@ -8,7 +8,6 @@ import InventoryForm, {
 import "./AddInventory.css";
 
 export default function AddInventory({ authToken }) {
-  // Prefer prop; fallback to localStorage
   const token =
     authToken ||
     (typeof window !== "undefined" ? localStorage.getItem("token") : null);
@@ -81,6 +80,7 @@ export default function AddInventory({ authToken }) {
           onSubmit={handleAdd}
           submitLabel="Save Item"
           validateOnChange={false}
+          token={token}
         />
       </div>
     </div>

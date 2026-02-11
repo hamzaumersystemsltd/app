@@ -1,0 +1,141 @@
+/* ===== Page Layout (same as Add/Inventory View) ===== */
+.viewvendor-page {
+  min-height: 85vh;
+  display: grid;
+  place-items: center;
+  background: #f5f7fb;
+  padding: 16px;
+}
+
+/* ===== Card container ===== */
+.viewvendor-card {
+  width: 100%;
+  max-width: 720px;
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+/* ===== Heading ===== */
+.viewvendor-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  text-align: center;
+}
+
+/* ===== Subtitle ===== */
+.viewvendor-subtitle {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* ===== Section labels ===== */
+.view-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+/* ===== Field values ===== */
+.view-value {
+  font-size: 14px;
+  color: #111827;
+  background: #f9fafb;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* ===== Grid layout (3-column + 2-column variant) ===== */
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.view-grid.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ===== Responsive (same as inventory) ===== */
+@media (max-width: 800px) {
+  .view-grid,
+  .view-grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .viewvendor-card {
+    padding: 20px;
+  }
+}
+
+/* ===== Description Section ===== */
+.view-description {
+  margin-top: 20px;
+}
+
+.view-description .view-value {
+  min-height: 80px;
+  line-height: 1.4;
+}
+
+/* ===== Footer metadata (timestamps) ===== */
+.view-footer {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+  padding-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===== Action buttons row ===== */
+.view-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+/* ===== Primary Button (Edit Vendor) ===== */
+.button-view {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.button-view:hover {
+  background: #1f2937;
+}
+
+.button-view:active {
+  transform: translateY(1px);
+}
+
+/* ===== Secondary Button (Back) ===== */
+.button-secondary {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button-secondary:hover {
+  background: #e5e7eb;
+}

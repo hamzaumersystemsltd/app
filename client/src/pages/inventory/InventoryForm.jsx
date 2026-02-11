@@ -7,7 +7,7 @@ import "./AddInventory.css";
 
 // ---- Shared constants/utilities (exported) ----
 export const API_BASE = "http://localhost:5000";
-export const currencyRegex = /^(?:\d+(?:\.\d{1,2})?)$/; // integers or up to 2 decimals
+export const currencyRegex = /^(?:\d+(?:\.\d{1,2})?)$/;
 
 // Async check for duplicate item code (protected route: requires token)
 export async function checkItemCodeAvailable(code, token) {
@@ -19,8 +19,6 @@ export async function checkItemCodeAvailable(code, token) {
     });
     return !!res.data?.available;
   } catch (err) {
-    // If the check fails (network/auth), don't block the user here;
-    // backend will still enforce uniqueness on submit.
     if (err?.response?.status === 401 || err?.response?.status === 403) {
       toast.error("Not authorized to check item code. Please log in as admin.");
     }
@@ -31,15 +29,8 @@ export async function checkItemCodeAvailable(code, token) {
 // --- Validation Schema (no meta fields on frontend) ---
 export const InventorySchema = Yup.object({
   itemCode: Yup.string()
-    .trim()
-    .min(2, "Min 2 characters")
-    .max(30, "Max 30 characters")
     .required("Item code is required")
-    .test(
-      "no-spaces",
-      "No spaces allowed in item code",
-      (v) => (v ?? "").trim() === (v ?? "").replace(/\s+/g, "")
-    ),
+    .matches(/^\d{5}$/, "Item code must be exactly 5 digits (e.g., 00001)"),
   name: Yup.string()
     .trim()
     .min(2, "Min 2 characters")
@@ -86,6 +77,7 @@ export default function InventoryForm({
   submitLabel = "Save Item",
   enableReinitialize = false,
   validateOnChange = false,
+  token,
 }) {
   return (
     <Formik
@@ -96,7 +88,7 @@ export default function InventoryForm({
       onSubmit={onSubmit}
       enableReinitialize={enableReinitialize}
     >
-      {({ isSubmitting }) => (
+      {({ isSubmitting, setFieldValue, values }) => (
         <Form>
           {/* 1) Name (full-width at the top) */}
           <div className="form-group">
@@ -108,13 +100,33 @@ export default function InventoryForm({
           {/* 2) Single line: Item Code, Category, Stock Quantity */}
           <div className="form-row">
             <div className="form-group">
-              <label className="label" htmlFor="itemCode">Item Code (unique)</label>
-              <Field
-                id="itemCode"
-                name="itemCode"
-                className="input"
-                placeholder="e.g., SKU-001"
-              />
+              <label className="label" htmlFor="itemCode">Item Code</label>
+
+              {/* Digit-only field, max 5, placeholder updated to 00001 */}
+              <Field name="itemCode">
+                {({ field, form: { setFieldValue, handleBlur, setFieldError } }) => (
+                  <input
+                    id="itemCode"
+                    {...field}
+                    className="input"
+                    inputMode="numeric"
+                    pattern="[0-9]{5}"
+                    maxLength={5}
+                    onChange={(e) => {
+                      const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
+                      setFieldValue("itemCode", onlyDigits);
+                    }}
+                    onBlur={async (e) => {
+                      handleBlur(e);
+                      const v = (e.target.value || "").trim();
+                      if (!/^\d{5}$/.test(v)) return; // only check if valid
+                      const available = await checkItemCodeAvailable(v, token);
+                      if (!available) setFieldError("itemCode", "This item code already exists");
+                    }}
+                  />
+                )}
+              </Field>
+
               <ErrorMessage name="itemCode" component="div" className="message" />
             </div>
 
@@ -124,7 +136,6 @@ export default function InventoryForm({
                 id="category"
                 name="category"
                 className="input"
-                placeholder="e.g., Grocery"
               />
               <ErrorMessage name="category" component="div" className="message" />
             </div>
@@ -136,7 +147,6 @@ export default function InventoryForm({
                 name="stockQuantity"
                 className="input"
                 inputMode="numeric"
-                placeholder="e.g., 100"
               />
               <ErrorMessage name="stockQuantity" component="div" className="message" />
             </div>
@@ -145,25 +155,23 @@ export default function InventoryForm({
           {/* 3) Prices (single line) */}
           <div className="form-row">
             <div className="form-group">
-              <label className="label" htmlFor="wsPrice">Wholesale (WS) Price</label>
+              <label className="label" htmlFor="wsPrice">Wholesale Price</label>
               <Field
                 id="wsPrice"
                 name="wsPrice"
                 className="input"
                 inputMode="decimal"
-                placeholder="e.g., 500 or 500.00"
               />
               <ErrorMessage name="wsPrice" component="div" className="message" />
             </div>
 
             <div className="form-group">
-              <label className="label" htmlFor="rtPrice">Retail (RT) Price</label>
+              <label className="label" htmlFor="rtPrice">Retail Price</label>
               <Field
                 id="rtPrice"
                 name="rtPrice"
                 className="input"
                 inputMode="decimal"
-                placeholder="e.g., 650 or 650.00"
               />
               <ErrorMessage name="rtPrice" component="div" className="message" />
             </div>
@@ -175,7 +183,6 @@ export default function InventoryForm({
                 name="costPrice"
                 className="input"
                 inputMode="decimal"
-                placeholder="e.g., 450 or 450.00"
               />
               <ErrorMessage name="costPrice" component="div" className="message" />
             </div>
@@ -183,13 +190,12 @@ export default function InventoryForm({
 
           {/* 4) Description */}
           <div className="form-group">
-            <label className="label" htmlFor="description">Description (optional)</label>
+            <label className="label" htmlFor="description">Description</label>
             <Field
               id="description"
               name="description"
               as="textarea"
               className="input"
-              placeholder="Enter an optional description of the item (max 500 characters)"
             />
             <ErrorMessage name="description" component="div" className="message" />
           </div>

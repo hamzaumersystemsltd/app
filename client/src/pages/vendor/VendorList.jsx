@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import "./InventoryList.css";
+import "./VendorList.css";
 
 const API_BASE = "http://localhost:5000";
 
-export default function InventoryList() {
-  const [items, setItems] = useState([]);
+export default function VendorList() {
+  const [vendors, setVendors] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -22,20 +22,22 @@ export default function InventoryList() {
   const load = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE}/api/inventory`, {
+
+      const res = await axios.get(`${API_BASE}/api/vendors`, {
         params: { page, limit, q: q || undefined },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+
       if (Array.isArray(res.data)) {
-        setItems(res.data);
+        setVendors(res.data);
         setTotal(res.data.length);
       } else {
-        setItems(res.data.items || []);
+        setVendors(res.data.items || []);
         setTotal(res.data.total ?? (res.data.items?.length || 0));
       }
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to fetch inventory");
+      toast.error(err.response?.data?.message || "Failed to fetch vendors");
     } finally {
       setLoading(false);
     }
@@ -56,25 +58,25 @@ export default function InventoryList() {
     toast.info(
       ({ closeToast }) => (
         <div>
-          <strong>Are you sure you want to delete this item?</strong>
+          <strong>Are you sure you want to delete this vendor?</strong>
+
           <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
             <button
               onClick={async () => {
                 closeToast();
 
                 try {
-                  await axios.delete(`${API_BASE}/api/inventory/${id}`, {
+                  await axios.delete(`${API_BASE}/api/vendors/${id}`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : {},
                   });
 
-                  // Optimistically update UI
-                  setItems((prev) => prev.filter((it) => it._id !== id));
+                  setVendors((prev) => prev.filter((v) => v._id !== id));
                   setTotal((t) => Math.max(0, t - 1));
 
-                  toast.success("Item deleted", { autoClose: 1500 });
+                  toast.success("Vendor deleted", { autoClose: 1500 });
                 } catch (err) {
                   console.error(err);
-                  toast.error(err.response?.data?.message || "Failed to delete item");
+                  toast.error(err.response?.data?.message || "Failed to delete vendor");
                 }
               }}
               style={{
@@ -112,19 +114,21 @@ export default function InventoryList() {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <div className="inventorylist-page">
-      <div className="inventorylist-card">
+    <div className="vendorlist-page">
+      <div className="vendorlist-card">
         {/* Header */}
-        <div className="inventorylist-header">
+        <div className="vendorlist-header">
           <div>
-            <h3 className="inventorylist-title">Inventory List</h3>
-            <p className="inventorylist-subtitle">Search, sort, and manage your items</p>
+            <h3 className="vendorlist-title">Vendor List</h3>
+            <p className="vendorlist-subtitle">
+              Search, filter and manage all vendors.
+            </p>
           </div>
 
-          <form className="inventorylist-search" onSubmit={handleSearch}>
+          <form className="vendorlist-search" onSubmit={handleSearch}>
             <input
               className="input"
-              placeholder="Search by name, code, category..."
+              placeholder="Search by vendor ID, name, company..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
@@ -135,12 +139,12 @@ export default function InventoryList() {
         </div>
 
         {/* Total + Per page */}
-        <div className="inventorylist-actions">
-          <div className="inventorylist-total">
+        <div className="vendorlist-actions">
+          <div className="vendorlist-total">
             <strong>Total:</strong> {total}
           </div>
 
-          <div className="inventorylist-perpage">
+          <div className="vendorlist-perpage">
             <label>Per page</label>
             <select
               className="input"
@@ -163,40 +167,60 @@ export default function InventoryList() {
           <table className="table">
             <thead>
               <tr>
-                <th>Item Code</th>
+                <th>Vendor ID</th>
                 <th>Name</th>
-                <th>Category</th>
-                <th>WS</th>
-                <th>RT</th>
-                <th>Cost</th>
-                <th>Qty</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>City</th>
+                <th>Status</th>
                 <th style={{ width: 260 }}>Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="row-center">Loading...</td>
+                  <td colSpan="8" className="row-center">
+                    Loading...
+                  </td>
                 </tr>
-              ) : items.length === 0 ? (
+              ) : vendors.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="row-center">No inventory found.</td>
+                  <td colSpan="8" className="row-center">
+                    No vendors found.
+                  </td>
                 </tr>
               ) : (
-                items.map((item) => (
-                  <tr key={item._id}>
-                    <td>{item.itemCode}</td>
-                    <td>{item.name}</td>
-                    <td>{item.category}</td>
-                    <td>{item.wsPrice}</td>
-                    <td>{item.rtPrice}</td>
-                    <td>{item.costPrice}</td>
-                    <td>{item.stockQuantity}</td>
+                vendors.map((v) => (
+                  <tr key={v._id}>
+                    <td>{v.vendorId}</td>
+                    <td>{v.name}</td>
+                    <td>{v.companyName || "-"}</td>
+                    <td>{v.email || "-"}</td>
+                    <td>{v.phone || "-"}</td>
+                    <td>{v.city || "-"}</td>
+                    <td>{v.status}</td>
                     <td>
                       <div className="actions">
-                        <Link to={`/inventory/view/${item._id}`} className="button sm info">View</Link>
-                        <Link to={`/inventory/edit/${item._id}`} className="button sm warn">Edit</Link>
-                        <button className="button sm danger" onClick={() => handleDelete(item._id)}>
+                        <Link
+                          to={`/vendor/view/${v._id}`}
+                          className="button sm info"
+                        >
+                          View
+                        </Link>
+
+                        <Link
+                          to={`/vendor/edit/${v._id}`}
+                          className="button sm warn"
+                        >
+                          Edit
+                        </Link>
+
+                        <button
+                          className="button sm danger"
+                          onClick={() => handleDelete(v._id)}
+                        >
                           Delete
                         </button>
                       </div>

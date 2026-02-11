@@ -14,6 +14,11 @@ import ViewInventory from "./pages/inventory/ViewInventory.jsx";
 import AddInventory from "./pages/inventory/AddInventory.jsx";
 import PurchaseInvoice from "./pages/inventory/PurchaseInvoice.jsx";
 import InventoryList from "./pages/inventory/InventoryList.jsx";
+import VendorLayout from "./pages/vendor/VendorLayout.jsx";
+import AddVendor from "./pages/vendor/AddVendor.jsx";
+import VendorList from "./pages/vendor/VendorList.jsx";
+import EditVendor from "./pages/vendor/EditVendor.jsx";
+import ViewVendor from "./pages/vendor/ViewVendor.jsx";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
@@ -49,7 +54,7 @@ export default function App() {
           }
         />
 
-        {/* ✅ ADMIN NESTED ROUTES */}
+        {/* ✅ ADMIN: INVENTORY (Nested) */}
         <Route
           path="/inventory"
           element={
@@ -65,6 +70,23 @@ export default function App() {
           <Route path="purchase-invoice" element={<PurchaseInvoice />} />
           <Route path="edit/:id" element={<EditInventory />} />
           <Route path="view/:id" element={<ViewInventory />} />
+        </Route>
+
+        {/* ✅ ADMIN: VENDOR (Nested) */}
+        <Route
+          path="/vendor"
+          element={
+            <ProtectedRoute>
+              <AdminRoute>
+                <VendorLayout />
+              </AdminRoute>
+            </ProtectedRoute>
+          }
+        >
+          <Route path="add-vendor" element={<AddVendor />} />
+          <Route path="vendor-list" element={<VendorList />} />
+          <Route path="edit/:id" element={<EditVendor />} />
+          <Route path="view/:id" element={<ViewVendor />} />
         </Route>
 
         {/* ✅ Public */}

@@ -9,24 +9,32 @@ export default function Nav() {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // --- Dropdown state for Inventory
+  // --- Inventory dropdown ---
   const [openInventory, setOpenInventory] = useState(false);
   const inventoryRef = useRef(null);
 
-  // Close dropdown when clicking outside
+  // --- Vendor dropdown ---
+  const [openVendor, setOpenVendor] = useState(false);
+  const vendorRef = useRef(null);
+
+  // Close dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (inventoryRef.current && !inventoryRef.current.contains(e.target)) {
         setOpenInventory(false);
+      }
+      if (vendorRef.current && !vendorRef.current.contains(e.target)) {
+        setOpenVendor(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close dropdown when route changes
+  // Close dropdowns when route changes
   useEffect(() => {
     setOpenInventory(false);
+    setOpenVendor(false);
   }, [pathname]);
 
   const handleLogout = () => {
@@ -74,19 +82,20 @@ export default function Nav() {
     );
   };
 
-  const inventoryActive =
-    pathname.startsWith("/inventory");
+  const inventoryActive = pathname.startsWith("/inventory");
+  const vendorActive = pathname.startsWith("/vendor");
 
   return (
     <header className="nav">
       <div className="nav-inner">
+
         {/* Brand */}
         <Link
           className="brand nav-link"
           to={!isAuthenticated ? "/login" : "/"}
           style={{ padding: 0, background: "transparent" }}
         >
-          MERN Project
+          TechEra
         </Link>
 
         <div className="links">
@@ -123,7 +132,7 @@ export default function Nav() {
                 Home
               </NavLink>
 
-              {/* Profile (all users) */}
+              {/* Profile */}
               <NavLink
                 to="/profile"
                 className={({ isActive }) =>
@@ -133,10 +142,10 @@ export default function Nav() {
                 Profile
               </NavLink>
 
-              {/* Admin only */}
+              {/* ADMIN ONLY DROPDOWNS */}
               {isAdmin && (
                 <>
-                  {/* Inventory as dropdown */}
+                  {/* INVENTORY DROPDOWN */}
                   <div
                     className={`dropdown ${inventoryActive ? "active" : ""}`}
                     ref={inventoryRef}
@@ -147,7 +156,7 @@ export default function Nav() {
                       className="nav-link dropdown-toggle"
                       aria-haspopup="true"
                       aria-expanded={openInventory}
-                      onClick={() => setOpenInventory((o) => !o)}
+                      onClick={() => setOpenInventory(o => !o)}
                     >
                       Inventory
                       <span className={`chevron ${openInventory ? "up" : "down"}`} />
@@ -162,7 +171,6 @@ export default function Nav() {
                         className={({ isActive }) =>
                           `dropdown-item ${isActive ? "active" : ""}`
                         }
-                        role="menuitem"
                       >
                         Add Inventory
                       </NavLink>
@@ -172,7 +180,6 @@ export default function Nav() {
                         className={({ isActive }) =>
                           `dropdown-item ${isActive ? "active" : ""}`
                         }
-                        role="menuitem"
                       >
                         Inventory List
                       </NavLink>
@@ -182,15 +189,57 @@ export default function Nav() {
                         className={({ isActive }) =>
                           `dropdown-item ${isActive ? "active" : ""}`
                         }
-                        role="menuitem"
                       >
                         Purchase Invoice
                       </NavLink>
                     </div>
                   </div>
+
+                  {/* VENDOR DROPDOWN */}
+                  <div
+                    className={`dropdown ${vendorActive ? "active" : ""}`}
+                    ref={vendorRef}
+                    onMouseEnter={() => setOpenVendor(true)}
+                    onMouseLeave={() => setOpenVendor(false)}
+                  >
+                    <button
+                      className="nav-link dropdown-toggle"
+                      aria-haspopup="true"
+                      aria-expanded={openVendor}
+                      onClick={() => setOpenVendor(o => !o)}
+                    >
+                      Vendor
+                      <span className={`chevron ${openVendor ? "up" : "down"}`} />
+                    </button>
+
+                    <div
+                      className={`dropdown-menu ${openVendor ? "show" : ""}`}
+                      role="menu"
+                    >
+                      <NavLink
+                        to="/vendor/add-vendor"
+                        className={({ isActive }) =>
+                          `dropdown-item ${isActive ? "active" : ""}`
+                        }
+                      >
+                        Add Vendor
+                      </NavLink>
+
+                      <NavLink
+                        to="/vendor/vendor-list"
+                        className={({ isActive }) =>
+                          `dropdown-item ${isActive ? "active" : ""}`
+                        }
+                      >
+                        Vendor List
+                      </NavLink>
+
+                    </div>
+                  </div>
                 </>
               )}
 
+              {/* Logout */}
               <button className="logout-btn" onClick={handleLogout}>
                 Logout
               </button>

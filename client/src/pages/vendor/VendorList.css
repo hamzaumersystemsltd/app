@@ -1,5 +1,5 @@
 /* ===== Page layout (same family as add/view) ===== */
-.inventorylist-page {
+.vendorlist-page {
   min-height: 85vh;
   display: grid;
   place-items: center;
@@ -8,7 +8,7 @@
 }
 
 /* ===== Card container ===== */
-.inventorylist-card {
+.vendorlist-card {
   width: 100%;
   max-width: 1100px; /* list is wider than forms */
   background: #ffffff;
@@ -19,7 +19,7 @@
 }
 
 /* ===== Header ===== */
-.inventorylist-header {
+.vendorlist-header {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
@@ -28,21 +28,21 @@
   margin-bottom: 12px;
 }
 
-.inventorylist-title {
+.vendorlist-title {
   margin: 0;
   font-size: 22px;
   font-weight: 800;
   color: #111827;
 }
 
-.inventorylist-subtitle {
+.vendorlist-subtitle {
   margin: 0;
   font-size: 13px;
   color: #6b7280;
 }
 
 /* ===== Actions row (total + per page) ===== */
-.inventorylist-actions {
+.vendorlist-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -50,18 +50,18 @@
   margin-bottom: 10px;
 }
 
-.inventorylist-total {
+.vendorlist-total {
   font-size: 14px;
   color: #374151;
 }
 
-.inventorylist-perpage {
+.vendorlist-perpage {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* ===== Inputs (match addinventory inputs) ===== */
+/* ===== Inputs (match add forms) ===== */
 .input {
   width: 93%;
   height: 42px;
@@ -89,17 +89,16 @@ select.input {
 }
 
 /* Inline search form */
-.inventorylist-search {
+.vendorlist-search {
   display: flex;
   gap: 10px;
   width: 100%;
   max-width: 520px;
 }
 
-/* ===== Primary/secondary buttons (same style family) ===== */
+/* ===== Buttons (primary/secondary) ===== */
 .button {
   padding: 10px 14px;
-  margin-top: 0px;
   border: none;
   border-radius: 8px;
   background: #111827;
@@ -123,22 +122,11 @@ select.input {
   cursor: not-allowed;
 }
 
-.button.secondary {
-  background: #f3f4f6;
-  color: #111827;
-}
-
-.button.secondary:hover {
-  background: #e5e7eb;
-}
-
-/* Small button variants for table actions */
+/* Small button variants */
 .button.sm {
   padding: 8px 10px;
   font-size: 13px;
   border-radius: 7px;
-  text-align: center;
-  text-decoration: none;
 }
 
 /* Intent variants */
@@ -185,7 +173,7 @@ select.input {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 800px; /* keep columns readable */
+  min-width: 800px;
 }
 
 .table thead th {
@@ -205,8 +193,8 @@ select.input {
   border-top: 1px solid #f0f2f6;
   font-size: 14px;
   color: #111827;
-  vertical-align: middle;
   background: #ffffff;
+  vertical-align: middle;
 }
 
 .table tbody tr:nth-child(even) td {
@@ -215,12 +203,11 @@ select.input {
 
 .table .actions {
   display: flex;
-  flex-wrap: nowrap;
   gap: 8px;
-  margin-top: 0px;
+  flex-wrap: nowrap;
 }
 
-/* Empty state / loading row */
+/* Empty / loading row */
 .table .row-center {
   text-align: center;
   color: #6b7280;
@@ -244,18 +231,21 @@ select.input {
 
 /* ===== Responsive ===== */
 @media (max-width: 800px) {
-  .inventorylist-card {
+  .vendorlist-card {
     padding: 16px;
   }
-  .inventorylist-header {
+
+  .vendorlist-header {
     flex-direction: column;
     align-items: stretch;
   }
-  .inventorylist-actions {
+
+  .vendorlist-actions {
     flex-direction: column;
     align-items: stretch;
   }
-  .inventorylist-search {
+
+  .vendorlist-search {
     max-width: 100%;
   }
 }

@@ -1,16 +1,5 @@
-/* ===== Page Layout (same as Add Inventory) ===== */
-.viewinventory-page {
-  min-height: 85vh;
-  display: grid;
-  place-items: center;
-  background: #f5f7fb;
-  padding: 16px;
-}
-
-/* ===== Card container (same base as Add Inventory) ===== */
+/* ===== Card container ===== */
 .viewinventory-card {
-  width: 100%;
-  max-width: 720px;
   background: #ffffff;
   border: 1px solid #e6e9ef;
   border-radius: 12px;
@@ -53,7 +42,7 @@
   border-radius: 8px;
 }
 
-/* ===== Grid layout for details (3-column matching AddInventory form-row) ===== */
+/* ===== Grid layout for details ===== */
 .view-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -65,7 +54,7 @@
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* ===== Responsive breakpoints (same as AddInventory) ===== */
+/* ===== Responsive breakpoints ===== */
 @media (max-width: 800px) {
   .view-grid,
   .view-grid.two {
@@ -86,7 +75,7 @@
   line-height: 1.4;
 }
 
-/* ===== Footer (timestamps, created/updated info) ===== */
+/* ===== Footer ===== */
 .view-footer {
   border-top: 1px solid #e5e7eb;
   margin-top: 20px;
@@ -95,7 +84,7 @@
   color: #6b7280;
 }
 
-/* ===== Buttons (same style as AddInventory but horizontal row) ===== */
+/* ===== Buttons ===== */
 .view-actions {
   display: flex;
   justify-content: space-between;

@@ -10,8 +10,8 @@ const inventorySchema = new mongoose.Schema(
     costPrice: { type: Number, required: true },
     stockQuantity: { type: Number, required: true, min: 0 },
     description: { type: String, trim: true, maxlength: 500 },
-
-    // By whom
+    image: { type: String, trim: true, default: null },
+    imagePath: { type: String, trim: true, default: null },
     createdBy: { type: String, required: true },
     updatedBy: { type: String, required: true },
   },

@@ -119,7 +119,7 @@ export default function InventoryForm({
                     onBlur={async (e) => {
                       handleBlur(e);
                       const v = (e.target.value || "").trim();
-                      if (!/^\d{5}$/.test(v)) return; // only check if valid
+                      if (!/^\d{5}$/.test(v)) return;
                       const available = await checkItemCodeAvailable(v, token);
                       if (!available) setFieldError("itemCode", "This item code already exists");
                     }}

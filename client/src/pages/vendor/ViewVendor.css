@@ -1,16 +1,5 @@
-/* ===== Page Layout (same as Add/Inventory View) ===== */
-.viewvendor-page {
-  min-height: 85vh;
-  display: grid;
-  place-items: center;
-  background: #f5f7fb;
-  padding: 16px;
-}
-
 /* ===== Card container ===== */
 .viewvendor-card {
-  width: 100%;
-  max-width: 720px;
   background: #ffffff;
   border: 1px solid #e6e9ef;
   border-radius: 12px;
@@ -65,7 +54,7 @@
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* ===== Responsive (same as inventory) ===== */
+/* ===== Responsive ===== */
 @media (max-width: 800px) {
   .view-grid,
   .view-grid.two {

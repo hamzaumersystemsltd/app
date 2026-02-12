@@ -144,7 +144,6 @@ router.patch("/:id", async (req, res) => {
 // --- (Optional) UPDATE (full) to match axios.put on frontend ---
 router.put("/:id", async (req, res) => {
   try {
-    // Treat PUT like a full payload update (you can tailor as needed)
     const {
       itemCode, name, category,
       wsPrice, rtPrice, costPrice,

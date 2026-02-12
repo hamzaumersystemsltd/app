@@ -1,8 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
+import "tippy.js/themes/material.css";
 import "./InventoryList.css";
+import { FiRefreshCw, FiLoader, FiEye, FiEdit2, FiTrash2, } from "react-icons/fi";
 
 const API_BASE = "http://localhost:5000";
 
@@ -19,13 +23,15 @@ export default function InventoryList() {
     []
   );
 
-  const load = async () => {
+  // Fetch inventory items
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get(`${API_BASE}/api/inventory`, {
         params: { page, limit, q: q || undefined },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+
       if (Array.isArray(res.data)) {
         setItems(res.data);
         setTotal(res.data.length);
@@ -39,17 +45,15 @@ export default function InventoryList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, q, token]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit]);
+  }, [load]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPage(1);
-    load();
+  const handleRefresh = async () => {
+    await load();
+    toast.success("Inventory refreshed", { autoClose: 1000 });
   };
 
   const handleDelete = (id) => {
@@ -67,39 +71,23 @@ export default function InventoryList() {
                     headers: token ? { Authorization: `Bearer ${token}` } : {},
                   });
 
-                  // Optimistically update UI
                   setItems((prev) => prev.filter((it) => it._id !== id));
                   setTotal((t) => Math.max(0, t - 1));
 
-                  toast.success("Item deleted", { autoClose: 1500 });
+                  toast.success("Item deleted", { autoClose: 1200 });
                 } catch (err) {
                   console.error(err);
-                  toast.error(err.response?.data?.message || "Failed to delete item");
+                  toast.error(
+                    err.response?.data?.message || "Failed to delete item"
+                  );
                 }
               }}
-              style={{
-                padding: "6px 10px",
-                backgroundColor: "#d9534f",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
+              className="btn danger"
             >
               Delete
             </button>
 
-            <button
-              onClick={closeToast}
-              style={{
-                padding: "6px 10px",
-                backgroundColor: "#6c757d",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={closeToast} className="btn secondary">
               Cancel
             </button>
           </div>
@@ -112,124 +100,174 @@ export default function InventoryList() {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <div className="inventorylist-page">
-      <div className="inventorylist-card">
-        {/* Header */}
-        <div className="inventorylist-header">
-          <div>
-            <h3 className="inventorylist-title">Inventory List</h3>
-            <p className="inventorylist-subtitle">Search, sort, and manage your items</p>
-          </div>
+    <div className="inventorylist-card">
+      {/* Header */}
+      <div className="inventorylist-header">
+        <div>
+          <h3 className="inventorylist-title">Inventory List</h3>
+          <p className="inventorylist-subtitle">
+            Search, sort, and manage your items
+          </p>
+        </div>
 
-          <form className="inventorylist-search" onSubmit={handleSearch}>
+        <div className="inventorylist-header-actions">
+          <div className="inventorylist-search">
             <input
               className="input"
               placeholder="Search by name, code, category..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
-            <button className="button outline" type="submit" disabled={loading}>
-              {loading ? "Searching..." : "Search"}
-            </button>
-          </form>
-        </div>
-
-        {/* Total + Per page */}
-        <div className="inventorylist-actions">
-          <div className="inventorylist-total">
-            <strong>Total:</strong> {total}
           </div>
 
-          <div className="inventorylist-perpage">
-            <label>Per page</label>
-            <select
-              className="input"
-              style={{ width: 120 }}
-              value={limit}
-              onChange={(e) => {
-                setLimit(Number(e.target.value));
-                setPage(1);
-              }}
+          {/* Refresh icon */}
+          <Tippy
+            content="Refresh"
+            theme="material"
+            delay={[150, 0]}
+            placement="bottom"
+          >
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="icon-button"
+              aria-label="Refresh"
+              disabled={loading}
             >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Item Code</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>WS</th>
-                <th>RT</th>
-                <th>Cost</th>
-                <th>Qty</th>
-                <th style={{ width: 260 }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="8" className="row-center">Loading...</td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="row-center">No inventory found.</td>
-                </tr>
+                <FiLoader size={18} className="spin" />
               ) : (
-                items.map((item) => (
-                  <tr key={item._id}>
-                    <td>{item.itemCode}</td>
-                    <td>{item.name}</td>
-                    <td>{item.category}</td>
-                    <td>{item.wsPrice}</td>
-                    <td>{item.rtPrice}</td>
-                    <td>{item.costPrice}</td>
-                    <td>{item.stockQuantity}</td>
-                    <td>
-                      <div className="actions">
-                        <Link to={`/inventory/view/${item._id}`} className="button sm info">View</Link>
-                        <Link to={`/inventory/edit/${item._id}`} className="button sm warn">Edit</Link>
-                        <button className="button sm danger" onClick={() => handleDelete(item._id)}>
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                <FiRefreshCw size={18} />
               )}
-            </tbody>
-          </table>
+            </button>
+          </Tippy>
+        </div>
+      </div>
+
+      {/* Total + Per page */}
+      <div className="inventorylist-actions">
+        <div className="inventorylist-total">
+          <strong>Total:</strong> {total}
         </div>
 
-        {/* Pagination */}
-        <div className="pagination-bar">
-          <button
-            className="button outline"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1 || loading}
+        <div className="inventorylist-perpage">
+          <label>Per page</label>
+          <select
+            className="input"
+            style={{ width: 120 }}
+            value={limit}
+            onChange={(e) => {
+              setLimit(Number(e.target.value));
+              setPage(1);
+            }}
           >
-            ‹ Prev
-          </button>
-
-          <div className="pagination-info">
-            Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-          </div>
-
-          <button
-            className="button outline"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages || loading}
-          >
-            Next ›
-          </button>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
         </div>
+      </div>
+
+      {/* TABLE */}
+      <div className="table-wrap">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Item Code</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>WS</th>
+              <th>RT</th>
+              <th>Cost</th>
+              <th>Qty</th>
+              <th style={{ width: 160 }}>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="8" className="row-center">
+                  Loading...
+                </td>
+              </tr>
+            ) : items.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="row-center">
+                  No inventory found.
+                </td>
+              </tr>
+            ) : (
+              items.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.itemCode}</td>
+                  <td>{item.name}</td>
+                  <td>{item.category}</td>
+                  <td>{item.wsPrice}</td>
+                  <td>{item.rtPrice}</td>
+                  <td>{item.costPrice}</td>
+                  <td>{item.stockQuantity}</td>
+
+                  <td>
+                    <div className="actions icons">
+                      <Tippy content="View" theme="material">
+                        <Link
+                          to={`/inventory/view/${item._id}`}
+                          className="icon-button info"
+                        >
+                          <FiEye size={18} />
+                        </Link>
+                      </Tippy>
+
+                      <Tippy content="Edit" theme="material">
+                        <Link
+                          to={`/inventory/edit/${item._id}`}
+                          className="icon-button warn"
+                        >
+                          <FiEdit2 size={18} />
+                        </Link>
+                      </Tippy>
+
+                      <Tippy content="Delete" theme="material">
+                        <button
+                          className="icon-button danger"
+                          onClick={() => handleDelete(item._id)}
+                        >
+                          <FiTrash2 size={18} />
+                        </button>
+                      </Tippy>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="pagination-bar">
+        <button
+          className="button outline"
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page <= 1 || loading}
+        >
+          ‹ Prev
+        </button>
+
+        <div className="pagination-info">
+          Page <strong>{page}</strong> of <strong>{totalPages}</strong>
+        </div>
+
+        <button
+          className="button outline"
+          onClick={() =>
+            setPage((p) => Math.min(totalPages, p + 1))
+          }
+          disabled={page >= totalPages || loading}
+        >
+          Next ›
+        </button>
       </div>
     </div>
   );

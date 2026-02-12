@@ -17,7 +17,6 @@ app.use(express.json());
 // Database connection
 connectDB();
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/vendors", vendorRoutes);

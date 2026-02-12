@@ -31,7 +31,6 @@ export default function AddInventory({ authToken }) {
         return;
       }
 
-      // Optional preflight duplicate check
       const available = await checkItemCodeAvailable(values.itemCode.trim(), token);
       if (!available) {
         setFieldError("itemCode", "This item code already exists");
@@ -70,7 +69,7 @@ export default function AddInventory({ authToken }) {
   };
 
   return (
-    <div className="addinventory-page">
+    // <div className="addinventory-page">
       <div className="addinventory-card">
         <h3 className="addinventory-title">Add Inventory</h3>
         <p className="addinventory-subtitle">Enter item details and save to inventory</p>
@@ -83,6 +82,6 @@ export default function AddInventory({ authToken }) {
           token={token}
         />
       </div>
-    </div>
+    // </div>
   );
 }

@@ -59,18 +59,18 @@ export default function ViewVendor() {
   /* ---------------------------- LOADING STATE ---------------------------- */
   if (loading) {
     return (
-      <div className="viewvendor-page">
+      // <div className="viewvendor-page">
         <div className="viewvendor-card">
           <h3 className="viewvendor-title">Loading vendor details...</h3>
         </div>
-      </div>
+      // </div>
     );
   }
 
   /* ----------------------------- ERROR STATE ----------------------------- */
   if (errMsg) {
     return (
-      <div className="viewvendor-page">
+      // <div className="viewvendor-page">
         <div className="viewvendor-card">
           <h3 className="viewvendor-title">Vendor Details</h3>
           <p className="viewvendor-subtitle">Something went wrong</p>
@@ -95,14 +95,14 @@ export default function ViewVendor() {
             </button>
           </div>
         </div>
-      </div>
+      // </div>
     );
   }
 
   /* ---------------------------- NOT FOUND STATE --------------------------- */
   if (!vendor) {
     return (
-      <div className="viewvendor-page">
+      // <div className="viewvendor-page">
         <div className="viewvendor-card">
           <h3 className="viewvendor-title">Vendor not found</h3>
           <div className="view-actions" style={{ marginTop: 16 }}>
@@ -114,13 +114,13 @@ export default function ViewVendor() {
             </button>
           </div>
         </div>
-      </div>
+      // </div>
     );
   }
 
   /* ------------------------------ MAIN VIEW ------------------------------- */
   return (
-    <div className="viewvendor-page">
+    // <div className="viewvendor-page">
       <div className="viewvendor-card">
         {/* Header */}
         <h3 className="viewvendor-title">Vendor Details</h3>
@@ -217,6 +217,6 @@ export default function ViewVendor() {
           </div>
         </div>
       </div>
-    </div>
+    // </div>
   );
 }

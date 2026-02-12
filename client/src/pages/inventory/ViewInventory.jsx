@@ -5,7 +5,6 @@ import "./ViewInventory.css";
 
 const API_BASE = "http://localhost:5000";
 
-// Optional currency formatter; tweak locale/currency as you prefer
 const formatMoney = (n) =>
   typeof n === "number"
     ? new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR", maximumFractionDigits: 2 }).format(n)
@@ -58,17 +57,17 @@ export default function ViewInventory() {
 
   if (loading) {
     return (
-      <div className="viewinventory-page">
+      // <div className="viewinventory-page">
         <div className="viewinventory-card">
           <h3 className="viewinventory-title">Loading item details...</h3>
         </div>
-      </div>
+      // </div>
     );
   }
 
   if (errMsg) {
     return (
-      <div className="viewinventory-page">
+      // <div className="viewinventory-page">
         <div className="viewinventory-card">
           <h3 className="viewinventory-title">Inventory Details</h3>
           <p className="viewinventory-subtitle">Something went wrong</p>
@@ -86,13 +85,13 @@ export default function ViewInventory() {
             </button>
           </div>
         </div>
-      </div>
+      // </div>
     );
   }
 
   if (!item) {
     return (
-      <div className="viewinventory-page">
+      // <div className="viewinventory-page">
         <div className="viewinventory-card">
           <h3 className="viewinventory-title">Item not found</h3>
           <div className="view-actions" style={{ marginTop: 16 }}>
@@ -104,12 +103,12 @@ export default function ViewInventory() {
             </button>
           </div>
         </div>
-      </div>
+      // </div>
     );
   }
 
   return (
-    <div className="viewinventory-page">
+    // <div className="viewinventory-page">
       <div className="viewinventory-card">
         {/* Header */}
         <h3 className="viewinventory-title">Inventory Details</h3>
@@ -193,6 +192,6 @@ export default function ViewInventory() {
           </div>
         </div>
       </div>
-    </div>
+    // </div>
   );
 }

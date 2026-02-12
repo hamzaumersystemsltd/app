@@ -1,16 +1,5 @@
-/* ===== Page layout (matches inventory/register) ===== */
-.addvendor-page {
-  min-height: 85vh;
-  display: grid;
-  place-items: center;
-  background: #f5f7fb;
-  padding: 16px;
-}
-
 /* ===== Card container ===== */
 .addvendor-card {
-  width: 100%;
-  max-width: 720px; /* same as inventory */
   background: #ffffff;
   border: 1px solid #e6e9ef;
   border-radius: 12px;
@@ -149,7 +138,7 @@ textarea.input {
   }
 }
 
-/* ===== Remove number arrows (optional consistency) ===== */
+/* ===== Remove number arrows ===== */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;

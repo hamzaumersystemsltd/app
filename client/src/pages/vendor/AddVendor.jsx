@@ -36,7 +36,6 @@ export default function AddVendor({ authToken }) {
         return;
       }
 
-      // Optional duplicate check (same style as inventory)
       const available = await checkVendorIdAvailable(
         values.vendorId.trim(),
         token
@@ -83,7 +82,7 @@ export default function AddVendor({ authToken }) {
   };
 
   return (
-    <div className="addvendor-page">
+    // <div className="addvendor-page">
       <div className="addvendor-card">
         <h3 className="addvendor-title">Add Vendor</h3>
         <p className="addvendor-subtitle">
@@ -98,6 +97,6 @@ export default function AddVendor({ authToken }) {
           token={token}
         />
       </div>
-    </div>
+    // </div>
   );
 }

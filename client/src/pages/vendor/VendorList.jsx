@@ -1,8 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Tippy from "@tippyjs/react";
+import "tippy.js/dist/tippy.css";
+import "tippy.js/themes/material.css";
 import "./VendorList.css";
+import { FiRefreshCw, FiLoader, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 
 const API_BASE = "http://localhost:5000";
 
@@ -19,7 +23,7 @@ export default function VendorList() {
     []
   );
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -41,17 +45,15 @@ export default function VendorList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, q, token]);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit]);
+  }, [load]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPage(1);
-    load();
+  const handleRefresh = async () => {
+    await load();
+    toast.success("Vendor list refreshed", { autoClose: 1000 });
   };
 
   const handleDelete = (id) => {
@@ -64,7 +66,6 @@ export default function VendorList() {
             <button
               onClick={async () => {
                 closeToast();
-
                 try {
                   await axios.delete(`${API_BASE}/api/vendors/${id}`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -79,29 +80,12 @@ export default function VendorList() {
                   toast.error(err.response?.data?.message || "Failed to delete vendor");
                 }
               }}
-              style={{
-                padding: "6px 10px",
-                backgroundColor: "#d9534f",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
+              className="btn danger"
             >
               Delete
             </button>
 
-            <button
-              onClick={closeToast}
-              style={{
-                padding: "6px 10px",
-                backgroundColor: "#6c757d",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={closeToast} className="btn secondary">
               Cancel
             </button>
           </div>
@@ -114,146 +98,155 @@ export default function VendorList() {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <div className="vendorlist-page">
-      <div className="vendorlist-card">
-        {/* Header */}
-        <div className="vendorlist-header">
-          <div>
-            <h3 className="vendorlist-title">Vendor List</h3>
-            <p className="vendorlist-subtitle">
-              Search, filter and manage all vendors.
-            </p>
-          </div>
+    <div className="vendorlist-card">
+      {/* Header */}
+      <div className="vendorlist-header">
+        <div>
+          <h3 className="vendorlist-title">Vendor List</h3>
+          <p className="vendorlist-subtitle">
+            Search, filter and manage all vendors.
+          </p>
+        </div>
 
-          <form className="vendorlist-search" onSubmit={handleSearch}>
+        <div className="vendorlist-header-actions">
+          <div className="vendorlist-search">
             <input
               className="input"
               placeholder="Search by vendor ID, name, company..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
-            <button className="button outline" type="submit" disabled={loading}>
-              {loading ? "Searching..." : "Search"}
-            </button>
-          </form>
-        </div>
-
-        {/* Total + Per page */}
-        <div className="vendorlist-actions">
-          <div className="vendorlist-total">
-            <strong>Total:</strong> {total}
           </div>
 
-          <div className="vendorlist-perpage">
-            <label>Per page</label>
-            <select
-              className="input"
-              style={{ width: 120 }}
-              value={limit}
-              onChange={(e) => {
-                setLimit(Number(e.target.value));
-                setPage(1);
-              }}
+          {/* Refresh */}
+          <Tippy content="Refresh" theme="material" placement="bottom" delay={[150, 0]}>
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="icon-button"
+              aria-label="Refresh"
+              disabled={loading}
             >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
+              {loading ? <FiLoader size={18} className="spin" /> : <FiRefreshCw size={18} />}
+            </button>
+          </Tippy>
+        </div>
+      </div>
+
+      {/* Total + Per page */}
+      <div className="vendorlist-actions">
+        <div className="vendorlist-total">
+          <strong>Total:</strong> {total}
         </div>
 
-        {/* Table */}
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
+        <div className="vendorlist-perpage">
+          <label>Per page</label>
+          <select
+            className="input"
+            style={{ width: 120 }}
+            value={limit}
+            onChange={(e) => {
+              setLimit(Number(e.target.value));
+              setPage(1);
+            }}
+          >
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="table-wrap">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Vendor ID</th>
+              <th>Name</th>
+              <th>Company</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>City</th>
+              <th>Status</th>
+              <th style={{ width: 160 }}>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
               <tr>
-                <th>Vendor ID</th>
-                <th>Name</th>
-                <th>Company</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>City</th>
-                <th>Status</th>
-                <th style={{ width: 260 }}>Actions</th>
+                <td colSpan="8" className="row-center">Loading...</td>
               </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="8" className="row-center">
-                    Loading...
-                  </td>
-                </tr>
-              ) : vendors.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="row-center">
-                    No vendors found.
-                  </td>
-                </tr>
-              ) : (
-                vendors.map((v) => (
-                  <tr key={v._id}>
-                    <td>{v.vendorId}</td>
-                    <td>{v.name}</td>
-                    <td>{v.companyName || "-"}</td>
-                    <td>{v.email || "-"}</td>
-                    <td>{v.phone || "-"}</td>
-                    <td>{v.city || "-"}</td>
-                    <td>{v.status}</td>
-                    <td>
-                      <div className="actions">
-                        <Link
-                          to={`/vendor/view/${v._id}`}
-                          className="button sm info"
-                        >
-                          View
+            ) : vendors.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="row-center">No vendors found.</td>
+              </tr>
+            ) : (
+              vendors.map((v) => (
+                <tr key={v._id}>
+                  <td>{v.vendorId}</td>
+                  <td>{v.name}</td>
+                  <td>{v.companyName || "-"}</td>
+                  <td>{v.email || "-"}</td>
+                  <td>{v.phone || "-"}</td>
+                  <td>{v.city || "-"}</td>
+                  <td>{v.status}</td>
+                  <td>
+                    <div className="actions icons">
+                      {/* View */}
+                      <Tippy content="View" theme="material">
+                        <Link to={`/vendor/view/${v._id}`} className="icon-button info">
+                          <FiEye size={18} />
                         </Link>
+                      </Tippy>
 
-                        <Link
-                          to={`/vendor/edit/${v._id}`}
-                          className="button sm warn"
-                        >
-                          Edit
+                      {/* Edit */}
+                      <Tippy content="Edit" theme="material">
+                        <Link to={`/vendor/edit/${v._id}`} className="icon-button warn">
+                          <FiEdit2 size={18} />
                         </Link>
+                      </Tippy>
 
+                      {/* Delete */}
+                      <Tippy content="Delete" theme="material">
                         <button
-                          className="button sm danger"
+                          className="icon-button danger"
                           onClick={() => handleDelete(v._id)}
                         >
-                          Delete
+                          <FiTrash2 size={18} />
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      </Tippy>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="pagination-bar">
+        <button
+          className="button outline"
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page <= 1 || loading}
+        >
+          ‹ Prev
+        </button>
+
+        <div className="pagination-info">
+          Page <strong>{page}</strong> of <strong>{totalPages}</strong>
         </div>
 
-        {/* Pagination */}
-        <div className="pagination-bar">
-          <button
-            className="button outline"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1 || loading}
-          >
-            ‹ Prev
-          </button>
-
-          <div className="pagination-info">
-            Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-          </div>
-
-          <button
-            className="button outline"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages || loading}
-          >
-            Next ›
-          </button>
-        </div>
+        <button
+          className="button outline"
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          disabled={page >= totalPages || loading}
+        >
+          Next ›
+        </button>
       </div>
     </div>
   );

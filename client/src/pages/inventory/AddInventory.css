@@ -1,17 +1,5 @@
-/* ===== Page layout (matches register) ===== */
-.addinventory-page {
-  min-height: 85vh;
-  display: grid;
-  place-items: center;
-  background: #f5f7fb;
-  padding: 16px;
-}
-
 /* ===== Card container ===== */
 .addinventory-card {
-  width: 100%;
-  /* Wider than register to accommodate more fields; change to 380px if you want identical width */
-  max-width: 720px;
   background: #ffffff;
   border: 1px solid #e6e9ef;
   border-radius: 12px;
@@ -19,7 +7,7 @@
   padding: 24px;
 }
 
-/* ===== Heading (matches register) ===== */
+/* ===== Heading ===== */
 .addinventory-title {
   margin: 0 0 6px;
   font-size: 22px;
@@ -28,7 +16,7 @@
   text-align: center;
 }
 
-/* ===== Subtitle (matches register) ===== */
+/* ===== Subtitle ===== */
 .addinventory-subtitle {
   margin: 0 0 20px;
   font-size: 13px;
@@ -49,7 +37,7 @@
   color: #374151;
 }
 
-/* Inputs match register styling */
+/* Inputs */
 .input {
   width: 93%;
   height: 42px;
@@ -78,7 +66,7 @@ select.input {
   width: 100%;
 }
 
-/* ===== Textarea (description) matches inputs but with flexible height ===== */
+/* ===== Textarea ===== */
 textarea.input {
   width: 96.5%;
   min-height: 96px;
@@ -86,10 +74,10 @@ textarea.input {
   padding-top: 10px;
   padding-bottom: 10px;
   line-height: 1.4;
-  resize: vertical; /* allow user to expand */
+  resize: vertical;
 }
 
-/* ===== Primary button (same as register) ===== */
+/* ===== Primary button ===== */
 .button {
   width: 100%;
   margin-top: 6px;
@@ -117,13 +105,13 @@ textarea.input {
   cursor: not-allowed;
 }
 
-/* Optional secondary button (used for helper actions) */
+/* Optional secondary button */
 .button.secondary {
   background: #f3f4f6;
   color: #111827;
 }
 
-/* ===== Error / info message (matches register) ===== */
+/* ===== Error / info message ===== */
 .message {
   margin-top: 10px;
   font-size: 12px;
@@ -131,7 +119,7 @@ textarea.input {
   text-align: center;
 }
 
-/* ===== Helper row (matches register) ===== */
+/* ===== Helper row ===== */
 .helper-row {
   margin-top: 14px;
   font-size: 12px;
@@ -163,7 +151,7 @@ textarea.input {
   }
 }
 
-/* ===== Remove number arrows (if you decide to use type=number) ===== */
+/* ===== Remove number arrows ===== */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;

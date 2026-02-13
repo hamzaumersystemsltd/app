@@ -22,9 +22,8 @@
   margin-right: auto;
   font-weight: 800;
   font-size: 16px;
-  color: #111827; /* slate-900 */
-  letter-spacing: 0.2px;
-  text-decoration: none; /* works for <a> or <div> */
+  color: #111827;
+  text-decoration: none;
 }
 
 /* ===== Link list ===== */
@@ -58,7 +57,7 @@
   font-weight: 600;
 }
 
-/* ===== Primary action (consistent with app buttons) ===== */
+/* ===== Primary action (kept for consistency) ===== */
 .nav-btn,
 .logout-btn {
   display: inline-flex;
@@ -67,12 +66,12 @@
   padding: 8px 12px;
   border: none;
   border-radius: 8px;
-  background: #111827;  /* app primary: dark */
+  background: #111827;
   color: #ffffff;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, transform 0.05s ease;
-  text-decoration: none; /* in case it's an <a> */
+  text-decoration: none;
 }
 
 .nav-btn:hover,
@@ -86,7 +85,7 @@
 }
 
 /* ========================= */
-/* ===== Dropdown (Inventory) */
+/* ===== Dropdowns ========= */
 /* ========================= */
 
 .dropdown {
@@ -139,7 +138,8 @@
 .dropdown-menu {
   position: absolute;
   top: calc(100%);
-  left: 0;
+  right:0;
+  left: auto;
   min-width: 151px;
   background: #ffffff;
   border: 1px solid #e6e9ef;
@@ -147,7 +147,7 @@
   box-shadow: 0 10px 24px rgba(17, 24, 39, 0.10);
   padding: 6px;
   z-index: 1000;
-  display: none; /* hidden by default; toggled via .show */
+  display: none;
 }
 
 /* Visible state controlled from React */
@@ -164,6 +164,7 @@
   border-radius: 6px;
   font-size: 0.95rem;
   transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer; /* so text looks interactive */
 }
 
 .dropdown-item:hover {
@@ -177,7 +178,65 @@
   font-weight: 600;
 }
 
-/* Optional hover-to-open on large screens (click still works on mobile) */
+.dropdown-item.danger {
+  color: #c0392b;
+}
+
+.dropdown-item.danger:hover {
+  background: #fff1f0;
+}
+
+/* ========================= */
+/* ===== Avatar Button ===== */
+/* ========================= */
+
+.avatar-btn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-btn:hover {
+  background: #f3f4f6;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-fallback {
+  width: 38px;
+  height: 38px;
+  background: #1f2937;
+  color: #ffffff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+/* Improve keyboard focus for text items (logout text) */
+.logout-text:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ===== Optional hover-to-open on large screens ===== */
 @media (hover: hover) and (pointer: fine) {
   .dropdown:hover .dropdown-menu {
     display: block;
@@ -207,7 +266,6 @@
     font-size: 15px;
   }
 
-  /* Menu remains overlay but sized reasonably */
   .dropdown-menu {
     min-width: 200px;
     box-shadow: 0 8px 18px rgba(17, 24, 39, 0.12);

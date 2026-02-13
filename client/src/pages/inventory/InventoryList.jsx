@@ -6,9 +6,19 @@ import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/material.css";
 import "./InventoryList.css";
-import { FiRefreshCw, FiLoader, FiEye, FiEdit2, FiTrash2, } from "react-icons/fi";
+import { FiRefreshCw, FiLoader, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 
 const API_BASE = "http://localhost:5000";
+
+// Very small inline placeholder (1x1 gray pixel) used when item.image is missing
+const PLACEHOLDER_DATA_URL =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'>
+      <rect width='100%' height='100%' fill='#f0f0f0'/>
+      <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#bbb' font-size='10' font-family='sans-serif'>No Image</text>
+    </svg>`
+  );
 
 export default function InventoryList() {
   const [items, setItems] = useState([]);
@@ -116,7 +126,10 @@ export default function InventoryList() {
               className="input"
               placeholder="Search by name, code, category..."
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
 
@@ -134,11 +147,7 @@ export default function InventoryList() {
               aria-label="Refresh"
               disabled={loading}
             >
-              {loading ? (
-                <FiLoader size={18} className="spin" />
-              ) : (
-                <FiRefreshCw size={18} />
-              )}
+              {loading ? <FiLoader size={18} className="spin" /> : <FiRefreshCw size={18} />}
             </button>
           </Tippy>
         </div>
@@ -173,13 +182,14 @@ export default function InventoryList() {
         <table className="table">
           <thead>
             <tr>
-              <th>Item Code</th>
+              <th>Image</th>
+              <th>Item ID</th>
               <th>Name</th>
               <th>Category</th>
-              <th>WS</th>
-              <th>RT</th>
+              <th>Wholesale</th>
+              <th>Retail</th>
               <th>Cost</th>
-              <th>Qty</th>
+              <th>Quantity</th>
               <th style={{ width: 160 }}>Actions</th>
             </tr>
           </thead>
@@ -187,59 +197,79 @@ export default function InventoryList() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="8" className="row-center">
+                <td colSpan="9" className="row-center">
                   Loading...
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan="8" className="row-center">
+                <td colSpan="9" className="row-center">
                   No inventory found.
                 </td>
               </tr>
             ) : (
-              items.map((item) => (
-                <tr key={item._id}>
-                  <td>{item.itemCode}</td>
-                  <td>{item.name}</td>
-                  <td>{item.category}</td>
-                  <td>{item.wsPrice}</td>
-                  <td>{item.rtPrice}</td>
-                  <td>{item.costPrice}</td>
-                  <td>{item.stockQuantity}</td>
+              items.map((item) => {
+                const imgSrc = item?.image || PLACEHOLDER_DATA_URL;
+                const imgAlt = item?.name ? `${item.name} image` : "item image";
 
-                  <td>
-                    <div className="actions icons">
-                      <Tippy content="View" theme="material">
-                        <Link
-                          to={`/inventory/view/${item._id}`}
-                          className="icon-button info"
-                        >
-                          <FiEye size={18} />
-                        </Link>
-                      </Tippy>
+                return (
+                  <tr key={item._id}>
+                    <td>
+                      <div className="thumb-cell">
+                        <img
+                          src={imgSrc}
+                          alt={imgAlt}
+                          className="thumb"
+                          loading="lazy"
+                          onError={(e) => {
+                            // fallback if broken URL
+                            e.currentTarget.src = PLACEHOLDER_DATA_URL;
+                          }}
+                        />
+                      </div>
+                    </td>
 
-                      <Tippy content="Edit" theme="material">
-                        <Link
-                          to={`/inventory/edit/${item._id}`}
-                          className="icon-button warn"
-                        >
-                          <FiEdit2 size={18} />
-                        </Link>
-                      </Tippy>
+                    <td>{item.itemCode}</td>
+                    <td>{item.name}</td>
+                    <td>{item.category}</td>
+                    <td>{item.wsPrice}</td>
+                    <td>{item.rtPrice}</td>
+                    <td>{item.costPrice}</td>
+                    <td>{item.stockQuantity}</td>
 
-                      <Tippy content="Delete" theme="material">
-                        <button
-                          className="icon-button danger"
-                          onClick={() => handleDelete(item._id)}
-                        >
-                          <FiTrash2 size={18} />
-                        </button>
-                      </Tippy>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                    <td>
+                      <div className="actions icons">
+                        <Tippy content="View" theme="material">
+                          <Link
+                            to={`/inventory/view/${item._id}`}
+                            className="icon-button info"
+                          >
+                            <FiEye size={18} />
+                          </Link>
+                        </Tippy>
+
+                        <Tippy content="Edit" theme="material">
+                          <Link
+                            to={`/inventory/edit/${item._id}`}
+                            className="icon-button warn"
+                          >
+                            <FiEdit2 size={18} />
+                          </Link>
+                        </Tippy>
+
+                        <Tippy content="Delete" theme="material">
+                          <button
+                            className="icon-button danger"
+                            onClick={() => handleDelete(item._id)}
+                          >
+                            <FiTrash2 size={18} />
+                          </button>
+                        </Tippy>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -261,9 +291,7 @@ export default function InventoryList() {
 
         <button
           className="button outline"
-          onClick={() =>
-            setPage((p) => Math.min(totalPages, p + 1))
-          }
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
           disabled={page >= totalPages || loading}
         >
           Next ›

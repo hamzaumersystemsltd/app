@@ -281,3 +281,13 @@
     max-width: 100%;
   }
 }
+
+/* NEW — Image Thumbnail Styles  */
+.thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  background-color: #fff;
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
@@ -88,123 +88,175 @@ export default function InventoryForm({
       onSubmit={onSubmit}
       enableReinitialize={enableReinitialize}
     >
-      {({ isSubmitting, setFieldValue, values }) => (
-        <Form>
-          {/* 1) Name (full-width at the top) */}
-          <div className="form-group">
-            <label className="label" htmlFor="name">Name</label>
-            <Field id="name" name="name" className="input" />
-            <ErrorMessage name="name" component="div" className="message" />
-          </div>
+      {({ isSubmitting, setFieldValue, values, setFieldError, handleBlur }) => {
+        // Build a preview URL for the selected file
+        const previewUrl = useMemo(() => {
+          if (values.imageFile instanceof File) {
+            return URL.createObjectURL(values.imageFile);
+          }
+          return null;
+        }, [values.imageFile]);
 
-          {/* 2) Single line: Item Code, Category, Stock Quantity */}
-          <div className="form-row">
+        const handleImageChange = (e) => {
+          const file = e.currentTarget.files?.[0];
+          if (!file) {
+            setFieldValue("imageFile", null);
+            return;
+          }
+          const maxSize = 5 * 1024 * 1024; // 5MB
+          if (!file.type.startsWith("image/")) {
+            setFieldError("imageFile", "Only image files are allowed");
+            return;
+          }
+          if (file.size > maxSize) {
+            setFieldError("imageFile", "Image must be ≤ 5MB");
+            return;
+          }
+          setFieldValue("imageFile", file);
+        };
+
+        return (
+          <Form>
+            {/* 1) Name (full-width at the top) */}
             <div className="form-group">
-              <label className="label" htmlFor="itemCode">Item Code</label>
+              <label className="label" htmlFor="name">Name</label>
+              <Field id="name" name="name" className="input" />
+              <ErrorMessage name="name" component="div" className="message" />
+            </div>
 
-              {/* Digit-only field, max 5, placeholder updated to 00001 */}
-              <Field name="itemCode">
-                {({ field, form: { setFieldValue, handleBlur, setFieldError } }) => (
-                  <input
-                    id="itemCode"
-                    {...field}
-                    className="input"
-                    inputMode="numeric"
-                    pattern="[0-9]{5}"
-                    maxLength={5}
-                    onChange={(e) => {
-                      const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
-                      setFieldValue("itemCode", onlyDigits);
-                    }}
-                    onBlur={async (e) => {
-                      handleBlur(e);
-                      const v = (e.target.value || "").trim();
-                      if (!/^\d{5}$/.test(v)) return;
-                      const available = await checkItemCodeAvailable(v, token);
-                      if (!available) setFieldError("itemCode", "This item code already exists");
-                    }}
+            {/* 2) Single line: Item Code, Category, Stock Quantity */}
+            <div className="form-row">
+              <div className="form-group">
+                <label className="label" htmlFor="itemCode">Item Code</label>
+
+                {/* Digit-only field, max 5, placeholder updated to 00001 */}
+                <Field name="itemCode">
+                  {({ field, form: { setFieldValue, handleBlur, setFieldError } }) => (
+                    <input
+                      id="itemCode"
+                      {...field}
+                      className="input"
+                      inputMode="numeric"
+                      pattern="[0-9]{5}"
+                      maxLength={5}
+                      onChange={(e) => {
+                        const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
+                        setFieldValue("itemCode", onlyDigits);
+                      }}
+                      onBlur={async (e) => {
+                        handleBlur(e);
+                        const v = (e.target.value || "").trim();
+                        if (!/^\d{5}$/.test(v)) return;
+                        const available = await checkItemCodeAvailable(v, token);
+                        if (!available) setFieldError("itemCode", "This item code already exists");
+                      }}
+                    />
+                  )}
+                </Field>
+
+                <ErrorMessage name="itemCode" component="div" className="message" />
+              </div>
+
+              <div className="form-group">
+                <label className="label" htmlFor="category">Category</label>
+                <Field
+                  id="category"
+                  name="category"
+                  className="input"
+                />
+                <ErrorMessage name="category" component="div" className="message" />
+              </div>
+
+              <div className="form-group">
+                <label className="label" htmlFor="stockQuantity">Stock Quantity</label>
+                <Field
+                  id="stockQuantity"
+                  name="stockQuantity"
+                  className="input"
+                  inputMode="numeric"
+                />
+                <ErrorMessage name="stockQuantity" component="div" className="message" />
+              </div>
+            </div>
+
+            {/* 3) Prices (single line) */}
+            <div className="form-row">
+              <div className="form-group">
+                <label className="label" htmlFor="wsPrice">Wholesale Price</label>
+                <Field
+                  id="wsPrice"
+                  name="wsPrice"
+                  className="input"
+                  inputMode="decimal"
+                />
+                <ErrorMessage name="wsPrice" component="div" className="message" />
+              </div>
+
+              <div className="form-group">
+                <label className="label" htmlFor="rtPrice">Retail Price</label>
+                <Field
+                  id="rtPrice"
+                  name="rtPrice"
+                  className="input"
+                  inputMode="decimal"
+                />
+                <ErrorMessage name="rtPrice" component="div" className="message" />
+              </div>
+
+              <div className="form-group">
+                <label className="label" htmlFor="costPrice">Cost Price</label>
+                <Field
+                  id="costPrice"
+                  name="costPrice"
+                  className="input"
+                  inputMode="decimal"
+                />
+                <ErrorMessage name="costPrice" component="div" className="message" />
+              </div>
+            </div>
+
+            {/* 4) Description */}
+            <div className="form-group">
+              <label className="label" htmlFor="description">Description</label>
+              <Field
+                id="description"
+                name="description"
+                as="textarea"
+                className="input"
+              />
+              <ErrorMessage name="description" component="div" className="message" />
+            </div>
+
+            {/* 5) Image Upload */}
+            <div className="form-group">
+              <label className="label" htmlFor="imageFile">Image</label>
+              <input
+                id="imageFile"
+                name="imageFile"
+                type="file"
+                accept="image/*"
+                className="input"
+                onChange={handleImageChange}
+                onBlur={handleBlur}
+              />
+              <ErrorMessage name="imageFile" component="div" className="message" />
+              {previewUrl && (
+                <div style={{ marginTop: 8 }}>
+                  <img
+                    src={previewUrl}
+                    alt="preview"
+                    style={{ maxWidth: 180, maxHeight: 180, borderRadius: 6, border: '1px solid #ddd' }}
                   />
-                )}
-              </Field>
-
-              <ErrorMessage name="itemCode" component="div" className="message" />
+                </div>
+              )}
             </div>
 
-            <div className="form-group">
-              <label className="label" htmlFor="category">Category</label>
-              <Field
-                id="category"
-                name="category"
-                className="input"
-              />
-              <ErrorMessage name="category" component="div" className="message" />
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="stockQuantity">Stock Quantity</label>
-              <Field
-                id="stockQuantity"
-                name="stockQuantity"
-                className="input"
-                inputMode="numeric"
-              />
-              <ErrorMessage name="stockQuantity" component="div" className="message" />
-            </div>
-          </div>
-
-          {/* 3) Prices (single line) */}
-          <div className="form-row">
-            <div className="form-group">
-              <label className="label" htmlFor="wsPrice">Wholesale Price</label>
-              <Field
-                id="wsPrice"
-                name="wsPrice"
-                className="input"
-                inputMode="decimal"
-              />
-              <ErrorMessage name="wsPrice" component="div" className="message" />
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="rtPrice">Retail Price</label>
-              <Field
-                id="rtPrice"
-                name="rtPrice"
-                className="input"
-                inputMode="decimal"
-              />
-              <ErrorMessage name="rtPrice" component="div" className="message" />
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="costPrice">Cost Price</label>
-              <Field
-                id="costPrice"
-                name="costPrice"
-                className="input"
-                inputMode="decimal"
-              />
-              <ErrorMessage name="costPrice" component="div" className="message" />
-            </div>
-          </div>
-
-          {/* 4) Description */}
-          <div className="form-group">
-            <label className="label" htmlFor="description">Description</label>
-            <Field
-              id="description"
-              name="description"
-              as="textarea"
-              className="input"
-            />
-            <ErrorMessage name="description" component="div" className="message" />
-          </div>
-
-          <button className="button" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : submitLabel}
-          </button>
-        </Form>
-      )}
+            <button className="button" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : submitLabel}
+            </button>
+          </Form>
+        );
+      }}
     </Formik>
   );
 }

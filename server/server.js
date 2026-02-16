@@ -4,7 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import inventoryRoutes from "./routes/inventory.js"
 import vendorRoutes from "./routes/vendor.js";
-// import userRoutes from "./routes/userRoutes.js";
+import userRoutes from "./routes/users.js";
 // import adminRoutes from "./routes/adminRoutes.js";
 import connectDB from "./config/db.js";
 
@@ -20,7 +20,7 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/vendors", vendorRoutes);
-// app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 // app.use("/api/admin", adminRoutes);
 
 // Server start

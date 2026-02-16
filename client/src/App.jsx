@@ -6,6 +6,7 @@ import Register from "./pages/Register/Register.jsx";
 import Login from "./pages/Login/Login.jsx";
 import Home from "./pages/Home/Home.jsx";
 import UserProfile from "./pages/UserProfile/UserProfile.jsx";
+import EditProfile from "./pages/UserProfile/EditProfile.jsx";
 import Nav from "./components/Nav/Nav.jsx";
 import { ToastContainer } from "react-toastify";
 import InventoryLayout from "./pages/inventory/InventoryLayout.jsx";
@@ -50,6 +51,16 @@ export default function App() {
           element={
             <ProtectedRoute>
               <UserProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ✅ Edit Profile */}
+        <Route
+          path="/edit-profile"
+          element={
+            <ProtectedRoute>
+              <EditProfile />
             </ProtectedRoute>
           }
         />

@@ -1,0 +1,234 @@
+/* ===== Page layout (match register-page) ===== */
+.profile-page {
+  min-height: 85vh;
+  display: grid;
+  place-items: center;
+  background: #f5f7fb;
+  padding: 16px;
+}
+
+/* ===== Card container (match register-card) ===== */
+.profile-card {
+  width: 100%;
+  max-width: 480px; /* slightly wider for profile */
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+}
+
+/* ===== Heading (match register-title) ===== */
+.profile-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  text-align: center;
+}
+
+/* ===== Subtitle (match register-subtitle) ===== */
+.profile-subtitle {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* ===== Form ===== */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+/* Read-only / disabled input */
+.input:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+/* Select (inherits .input look) */
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%),
+    linear-gradient(135deg, #6b7280 50%, transparent 50%),
+    linear-gradient(to right, #d1d5db, #d1d5db);
+  background-position: calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 12px) calc(50% - 2px),
+    calc(100% - 36px) 50%;
+  background-size: 6px 6px, 6px 6px, 1px 60%;
+  background-repeat: no-repeat;
+  padding-right: 42px;
+}
+
+/* ===== Helper / hint ===== */
+.hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===== Error / info message (match register) ===== */
+.message {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #dc2626;
+  text-align: left; /* left-align inside form fields */
+}
+
+/* ===== Divider for optional section ===== */
+.divider {
+  margin: 18px 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 10px;
+}
+
+/* ===== Password strength meter (match register) ===== */
+.pwd-strength {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.pwd-strength-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 6px;
+  transition: width 200ms ease, background-color 200ms ease;
+}
+
+.pwd-strength-label {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ===== Actions row ===== */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* ===== Primary button (match register .button) ===== */
+.button {
+  flex: 1 1 auto;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s ease, transform 0.05s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: #1f2937;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Secondary button (for Cancel link) ===== */
+.button-secondary {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button-secondary:hover {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.06);
+  text-decoration: none;
+}
+
+/* ===== Loading ===== */
+.profile-loading {
+  min-height: 85vh;
+  display: grid;
+  place-items: center;
+  color: #6b7280;
+  font-size: 14px;
+  background: #f5f7fb;
+}
+
+/* ===== Inputs with number type: remove arrows (match register) ===== */
+#age::-webkit-outer-spin-button,
+#age::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#age {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 480px) {
+  .profile-card {
+    padding: 20px;
+  }
+  .actions {
+    flex-direction: column-reverse;
+  }
+}

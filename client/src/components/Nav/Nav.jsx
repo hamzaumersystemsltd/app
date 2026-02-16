@@ -842,7 +842,7 @@ export default function Nav() {
                   </NavLink>
 
                   <NavLink
-                    to="/profile/edit"
+                    to="/edit-profile"
                     className={({ isActive }) =>
                       `dropdown-item ${isActive ? "active" : ""}`
                     }

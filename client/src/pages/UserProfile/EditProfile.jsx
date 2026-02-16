@@ -10,6 +10,17 @@ import "./EditProfile.css";
 const nameRegex = /^[A-Za-z\s'-]+$/;
 const passwordStrongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 
+// Tiny inline placeholder for profile image
+const PLACEHOLDER_IMG =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>
+      <rect width='100%' height='100%' fill='#f3f4f6'/>
+      <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
+            fill='#9ca3af' font-size='14' font-family='sans-serif'>No Image</text>
+    </svg>`
+  );
+
 // Password strength utility
 function evaluatePasswordStrength(pw) {
   if (!pw) {
@@ -81,6 +92,7 @@ export default function EditProfile() {
     currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
+    profileImage: null, // NEW: for file input (kept separate from user.profileImage URL)
   };
 
   const EditSchema = Yup.object({
@@ -105,10 +117,9 @@ export default function EditProfile() {
       .max(120, "Please enter a valid age")
       .required("Age is required"),
 
-    gender: Yup.mixed()
-      .oneOf(["male", "female"], "Select gender")
-      .required("Gender is required"),
+    gender: Yup.mixed().oneOf(["male", "female"], "Select gender").required("Gender is required"),
 
+    // Optional password change
     newPassword: Yup.string().test(
       "empty-or-strong",
       "Password must be 8+ chars and include uppercase, lowercase, number, and special char",
@@ -127,27 +138,41 @@ export default function EditProfile() {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      const payload = {
-        firstName: values.firstName.trim(),
-        lastName: values.lastName.trim(),
-        age: Number(values.age),
-        gender: values.gender,
-      };
+      // Build multipart/form-data payload
+      const formData = new FormData();
+      formData.append("firstName", values.firstName.trim());
+      formData.append("lastName", values.lastName.trim());
+      formData.append("age", String(Number(values.age)));
+      formData.append("gender", values.gender);
 
+      // Include password fields only if changing password
       if (values.newPassword) {
-        payload.currentPassword = values.currentPassword;
-        payload.newPassword = values.newPassword;
+        formData.append("currentPassword", values.currentPassword);
+        formData.append("newPassword", values.newPassword);
+      }
+
+      // Append new profile image only if chosen
+      if (values.profileImage instanceof File) {
+        // must match multer field name on server: upload.single("profileImage")
+        formData.append("profileImage", values.profileImage);
       }
 
       const { data } = await axios.put(
         "http://localhost:5000/api/users/me",
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
+      // Common response shapes
       const updatedUser = data?.user || data;
       const newToken = data?.token || token;
 
+      // Update auth context + localStorage using your login(token, user) API
       if (updatedUser) login(newToken, updatedUser);
 
       toast.success("Profile updated successfully");
@@ -157,6 +182,7 @@ export default function EditProfile() {
           currentPassword: "",
           newPassword: "",
           confirmNewPassword: "",
+          profileImage: null,
         },
       });
       setNewPw("");
@@ -180,123 +206,200 @@ export default function EditProfile() {
           validationSchema={EditSchema}
           onSubmit={handleSubmit}
         >
-          {({ isSubmitting }) => (
-            <Form>
-              {/* First Name */}
-              <div className="form-group">
-                <label className="label" htmlFor="firstName">First name</label>
-                <Field id="firstName" name="firstName" className="input" autoComplete="given-name" />
-                <ErrorMessage name="firstName" component="div" className="message" />
-              </div>
+          {({ isSubmitting, values, setFieldValue, setFieldError, handleBlur }) => {
+            const handleImageChange = (e) => {
+              const file = e.currentTarget.files?.[0];
+              if (!file) {
+                setFieldValue("profileImage", null);
+                return;
+              }
+              const maxSize = 5 * 1024 * 1024; // 5MB
+              if (!file.type.startsWith("image/")) {
+                setFieldError("profileImage", "Only image files are allowed");
+                return;
+              }
+              if (file.size > maxSize) {
+                setFieldError("profileImage", "Image must be ≤ 5MB");
+                return;
+              }
+              setFieldValue("profileImage", file);
+            };
 
-              {/* Last Name */}
-              <div className="form-group">
-                <label className="label" htmlFor="lastName">Last name</label>
-                <Field id="lastName" name="lastName" className="input" autoComplete="family-name" />
-                <ErrorMessage name="lastName" component="div" className="message" />
-              </div>
+            return (
+              <Form>
+                {/* Profile Image (Current + Upload New + Live Preview) */}
+                <div className="form-group">
+                  <label className="label">Profile Image</label>
 
-              {/* Email (read-only here) */}
-              <div className="form-group">
-                <label className="label" htmlFor="email">Email</label>
-                <Field id="email" name="email" className="input" disabled />
-                <div className="hint">Email cannot be changed here.</div>
-              </div>
+                  {/* Current image */}
+                  <img
+                    src={user?.profileImage || PLACEHOLDER_IMG}
+                    alt="Current Profile"
+                    className="profile-preview"
+                    style={{
+                      width: 140,
+                      height: 140,
+                      borderRadius: "8px",
+                      objectFit: "cover",
+                      border: "1px solid #e5e7eb",
+                      background: "#fff",
+                      marginBottom: 10,
+                      display: "block",
+                    }}
+                    loading="lazy"
+                  />
 
-              {/* Gender */}
-              <div className="form-group">
-                <label className="label" htmlFor="gender">Gender</label>
-                <Field as="select" id="gender" name="gender" className="input select">
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </Field>
-                <ErrorMessage name="gender" component="div" className="message" />
-              </div>
+                  {/* New image file input */}
+                  <input
+                    id="profileImage"
+                    name="profileImage"
+                    type="file"
+                    accept="image/*"
+                    className="input"
+                    onChange={handleImageChange}
+                    onBlur={handleBlur}
+                  />
+                  <ErrorMessage name="profileImage" component="div" className="message" />
 
-              {/* Age */}
-              <div className="form-group">
-                <label className="label" htmlFor="age">Age</label>
-                <Field
-                  id="age"
-                  name="age"
-                  type="number"
-                  className="input"
-                  min="13"
-                  max="120"
-                  inputMode="numeric"
-                />
-                <ErrorMessage name="age" component="div" className="message" />
-              </div>
-
-              {/* Optional password change */}
-              <div className="divider">Change password (optional)</div>
-
-              <div className="form-group">
-                <label className="label" htmlFor="currentPassword">Current password</label>
-                <Field
-                  id="currentPassword"
-                  name="currentPassword"
-                  type="password"
-                  className="input"
-                  autoComplete="current-password"
-                />
-                <ErrorMessage name="currentPassword" component="div" className="message" />
-              </div>
-
-              <div className="form-group">
-                <label className="label" htmlFor="newPassword">
-                  New password (8+ chars, uppercase, lowercase, number, special)
-                </label>
-                <Field name="newPassword">
-                  {({ field }) => (
-                    <>
-                      <input
-                        id="newPassword"
-                        type="password"
-                        className="input"
-                        autoComplete="new-password"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setNewPw(e.target.value);
+                  {/* Live preview for the newly selected file */}
+                  {values.profileImage instanceof File && (
+                    <div style={{ marginTop: 8 }}>
+                      <img
+                        src={URL.createObjectURL(values.profileImage)}
+                        alt="Selected preview"
+                        style={{
+                          width: 140,
+                          height: 140,
+                          borderRadius: "8px",
+                          objectFit: "cover",
+                          border: "1px solid #e5e7eb",
+                          background: "#fff",
+                          display: "block",
                         }}
                       />
-                      <div className="pwd-strength">
-                        <div
-                          className="pwd-strength-bar"
-                          style={{ width: strength.width, backgroundColor: strength.color }}
-                        />
+                      <div className="hint" style={{ marginTop: 4, fontSize: 12, color: "#6b7280" }}>
+                        This will replace your current profile image after you save.
                       </div>
-                      <div className="pwd-strength-label" style={{ color: strength.color }}>
-                        {strength.label}
-                      </div>
-                    </>
+                    </div>
                   )}
-                </Field>
-                <ErrorMessage name="newPassword" component="div" className="message" />
-              </div>
+                </div>
 
-              <div className="form-group">
-                <label className="label" htmlFor="confirmNewPassword">Confirm new password</label>
-                <Field
-                  id="confirmNewPassword"
-                  name="confirmNewPassword"
-                  type="password"
-                  className="input"
-                  autoComplete="new-password"
-                />
-                <ErrorMessage name="confirmNewPassword" component="div" className="message" />
-              </div>
+                {/* First Name */}
+                <div className="form-group">
+                  <label className="label" htmlFor="firstName">First name</label>
+                  <Field id="firstName" name="firstName" className="input" autoComplete="given-name" />
+                  <ErrorMessage name="firstName" component="div" className="message" />
+                </div>
 
-              <div className="actions">
-                <Link to="/profile" className="button button-secondary">Cancel</Link>
-                <button className="button" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save changes"}
-                </button>
-              </div>
-            </Form>
-          )}
+                {/* Last Name */}
+                <div className="form-group">
+                  <label className="label" htmlFor="lastName">Last name</label>
+                  <Field id="lastName" name="lastName" className="input" autoComplete="family-name" />
+                  <ErrorMessage name="lastName" component="div" className="message" />
+                </div>
+
+                {/* Email (read-only here) */}
+                <div className="form-group">
+                  <label className="label" htmlFor="email">Email</label>
+                  <Field id="email" name="email" className="input" disabled />
+                  <div className="hint">Email cannot be changed here.</div>
+                </div>
+
+                {/* Gender */}
+                <div className="form-group">
+                  <label className="label" htmlFor="gender">Gender</label>
+                  <Field as="select" id="gender" name="gender" className="input select">
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </Field>
+                  <ErrorMessage name="gender" component="div" className="message" />
+                </div>
+
+                {/* Age */}
+                <div className="form-group">
+                  <label className="label" htmlFor="age">Age</label>
+                  <Field
+                    id="age"
+                    name="age"
+                    type="number"
+                    className="input"
+                    min="13"
+                    max="120"
+                    inputMode="numeric"
+                  />
+                  <ErrorMessage name="age" component="div" className="message" />
+                </div>
+
+                {/* Optional password change */}
+                <div className="divider">Change password (optional)</div>
+
+                <div className="form-group">
+                  <label className="label" htmlFor="currentPassword">Current password</label>
+                  <Field
+                    id="currentPassword"
+                    name="currentPassword"
+                    type="password"
+                    className="input"
+                    autoComplete="current-password"
+                  />
+                  <ErrorMessage name="currentPassword" component="div" className="message" />
+                </div>
+
+                <div className="form-group">
+                  <label className="label" htmlFor="newPassword">
+                    New password (8+ chars, uppercase, lowercase, number, special)
+                  </label>
+                  <Field name="newPassword">
+                    {({ field }) => (
+                      <>
+                        <input
+                          id="newPassword"
+                          type="password"
+                          className="input"
+                          autoComplete="new-password"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setNewPw(e.target.value);
+                          }}
+                        />
+                        <div className="pwd-strength">
+                          <div
+                            className="pwd-strength-bar"
+                            style={{ width: strength.width, backgroundColor: strength.color }}
+                          />
+                        </div>
+                        <div className="pwd-strength-label" style={{ color: strength.color }}>
+                          {strength.label}
+                        </div>
+                      </>
+                    )}
+                  </Field>
+                  <ErrorMessage name="newPassword" component="div" className="message" />
+                </div>
+
+                <div className="form-group">
+                  <label className="label" htmlFor="confirmNewPassword">Confirm new password</label>
+                  <Field
+                    id="confirmNewPassword"
+                    name="confirmNewPassword"
+                    type="password"
+                    className="input"
+                    autoComplete="new-password"
+                  />
+                  <ErrorMessage name="confirmNewPassword" component="div" className="message" />
+                </div>
+
+                <div className="actions">
+                  <Link to="/profile" className="button button-secondary">Cancel</Link>
+                  <button className="button" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : "Save changes"}
+                  </button>
+                </div>
+              </Form>
+            );
+          }}
         </Formik>
       </div>
     </div>

@@ -134,6 +134,8 @@ export const login = async (req, res) => {
         gender: user.gender,
         age: user.age,
         role: user.role,
+        profileImage: user.profileImage || null,
+        profileImagePath: user.profileImagePath || null
       },
     });
 

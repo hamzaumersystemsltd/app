@@ -181,10 +181,6 @@
 
 /* ===== Secondary button ===== */
 .button-secondary {
-  flex: 1 1 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   padding: 10px 14px;
   border: 1px solid #d1d5db;
   border-radius: 8px;

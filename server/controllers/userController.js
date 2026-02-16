@@ -1,13 +1,60 @@
 import bcrypt from "bcryptjs";
+import path from "path";
 import User from "../models/User.js";
+import { supabase } from "../config/supabaseClient.js";
 
 const nameRegex = /^[A-Za-z\s'-]+$/;
 const passwordStrongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 
+const USER_BUCKET = process.env.SUPABASE_USER_BUCKET || "profile-images";
+
+/* ---------- Supabase helpers ---------- */
+function safeSlug(str = "") {
+  return String(str)
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function buildProfilePath(userId, firstName, originalname) {
+  const ext = (path.extname(originalname || "") || ".jpg").toLowerCase();
+  const ts = Date.now();
+  const namePart = safeSlug(firstName || "user");
+  return `users/${userId}/${ts}_${namePart}${ext}`;
+}
+
+async function uploadToSupabase(file, storagePath) {
+  const { error } = await supabase
+    .storage
+    .from(USER_BUCKET)
+    .upload(storagePath, file.buffer, {
+      contentType: file.mimetype,
+      upsert: true,
+    });
+
+  if (error) {
+    throw new Error(`Supabase upload failed: ${error.message}`);
+  }
+
+  const { data } = supabase.storage.from(USER_BUCKET).getPublicUrl(storagePath);
+  return { publicUrl: data.publicUrl, storagePath };
+}
+
+async function removeFromSupabase(storagePath) {
+  if (!storagePath) return;
+  const { error } = await supabase.storage.from(USER_BUCKET).remove([storagePath]);
+  if (error) {
+    // Non-fatal: log only
+    console.warn("Supabase remove warning:", error.message);
+  }
+}
+
+/* ---------- Controllers ---------- */
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
-      "_id firstName lastName email age gender role"
+      "_id firstName lastName email age gender role profileImage"
     );
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -19,6 +66,7 @@ export const getMe = async (req, res) => {
       age: user.age,
       gender: user.gender,
       role: user.role,
+      profileImage: user.profileImage || null,
     });
   } catch (e) {
     console.error("getMe error:", e);
@@ -104,6 +152,21 @@ export const updateMe = async (req, res) => {
       user.password = hashed;
     }
 
+    // ---------- NEW: Handle profile image (optional) ----------
+    if (req.file) {
+      const firstNameForPath = updates.firstName || user.firstName || "user";
+      const storagePath = buildProfilePath(user._id, firstNameForPath, req.file.originalname);
+
+      const uploaded = await uploadToSupabase(req.file, storagePath);
+      updates.profileImage = uploaded.publicUrl;
+      updates.profileImagePath = uploaded.storagePath;
+
+      // Remove the old image (non-fatal if it fails)
+      if (user.profileImagePath && user.profileImagePath !== uploaded.storagePath) {
+        await removeFromSupabase(user.profileImagePath);
+      }
+    }
+
     // Apply validated updates
     Object.assign(user, updates);
     await user.save();
@@ -117,6 +180,7 @@ export const updateMe = async (req, res) => {
       age: user.age,
       gender: user.gender,
       role: user.role,
+      profileImage: user.profileImage || null,
     });
   } catch (e) {
     console.error("updateMe error:", e);

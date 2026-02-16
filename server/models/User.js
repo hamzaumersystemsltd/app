@@ -8,7 +8,9 @@ const UserSchema = new mongoose.Schema(
     age:       { type: Number, required: true, min: 13, max: 120 },
     gender:    { type: String, required: true, enum: ["male", "female"] },
     password:  { type: String, required: true, minlength: 8 },
-    role: { type: String, enum: ["admin", "user"], default: "user" }
+    role: { type: String, enum: ["admin", "user"], default: "user" },
+    profileImage: { type: String, trim: true, default: null },
+    profileImagePath: { type: String, trim: true, default: null }
   },
   { timestamps: true }
 );

@@ -1,12 +1,25 @@
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./UserProfile.css";
 
+const PLACEHOLDER_IMG =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>
+      <rect width='100%' height='100%' fill='#f3f4f6'/>
+      <text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle'
+            fill='#9ca3af' font-size='14' font-family='sans-serif'>No Image</text>
+    </svg>`
+  );
+
 const UserProfile = () => {
   const { user } = useAuth();
 
   if (!user) return <div className="profile-loading">Loading…</div>;
 
-  const { firstName, lastName, email, age, gender, role } = user;
+  const { firstName, lastName, email, age, gender, role, profileImage } = user;
+
+  const imgSrc = profileImage || PLACEHOLDER_IMG;
+  const imgAlt = `${firstName} ${lastName} profile photo`;
 
   return (
     <div className="profile-page">
@@ -14,6 +27,18 @@ const UserProfile = () => {
         <h1 className="profile-title">My Profile</h1>
         <p className="profile-subtitle">Personal information</p>
 
+        {/* ==== Profile Image ==== */}
+        <div className="profile-image-wrapper">
+          <img
+            src={imgSrc}
+            alt={imgAlt}
+            className="profile-image"
+            loading="lazy"
+            onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+          />
+        </div>
+
+        {/* ==== Info ==== */}
         <div className="profile-info">
           <Row label="First name" value={firstName} />
           <Row label="Last name" value={lastName} />

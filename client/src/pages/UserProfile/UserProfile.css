@@ -35,6 +35,22 @@
   text-align: center;
 }
 
+.profile-image-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.profile-image {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  display: block;
+}
+
 /* ===== Profile info container ===== */
 .profile-info {
   margin-top: 8px;
@@ -85,5 +101,10 @@
   .profile-row {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .profile-image {
+    width: 130px;
+    height: 130px;
   }
 }

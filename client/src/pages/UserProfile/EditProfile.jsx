@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext.jsx";
 import "./EditProfile.css";
 
-// Reuse the same regex as Register.jsx
 const nameRegex = /^[A-Za-z\s'-]+$/;
 const passwordStrongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
 
@@ -110,7 +109,6 @@ export default function EditProfile() {
       .oneOf(["male", "female"], "Select gender")
       .required("Gender is required"),
 
-    // Optional password change
     newPassword: Yup.string().test(
       "empty-or-strong",
       "Password must be 8+ chars and include uppercase, lowercase, number, and special char",
@@ -136,24 +134,20 @@ export default function EditProfile() {
         gender: values.gender,
       };
 
-      // Include password fields only if changing password
       if (values.newPassword) {
         payload.currentPassword = values.currentPassword;
         payload.newPassword = values.newPassword;
       }
 
-      // Adjust endpoint if your backend differs
       const { data } = await axios.put(
         "http://localhost:5000/api/users/me",
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Common response shapes
       const updatedUser = data?.user || data;
       const newToken = data?.token || token;
 
-      // Update auth context + localStorage using your login(token, user) API
       if (updatedUser) login(newToken, updatedUser);
 
       toast.success("Profile updated successfully");

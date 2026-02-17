@@ -195,7 +195,7 @@ export default function EditProfile() {
   };
 
   return (
-    <div className="profile-page">
+    // <div className="profile-page">
       <div className="profile-card">
         <h1 className="profile-title">Edit Profile</h1>
         <p className="profile-subtitle">Update your personal information</p>
@@ -402,6 +402,6 @@ export default function EditProfile() {
           }}
         </Formik>
       </div>
-    </div>
+    // </div>
   );
 }

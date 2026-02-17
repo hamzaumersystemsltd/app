@@ -1,0 +1,202 @@
+/* ===== Card container ===== */
+.pi-card {
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+}
+
+/* ===== Header ===== */
+.pi-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.pi-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.pi-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ===== Alerts ===== */
+.pi-alert {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  color: #1e40af;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+/* ===== Table Wrapper ===== */
+.pi-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* ===== Table ===== */
+.pi-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 900px;
+}
+
+.pi-table thead th {
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pi-table tbody td {
+  padding: 15px;
+  border-top: 1px solid #f0f2f6;
+  font-size: 14px;
+  color: #111827;
+  background: #ffffff;
+}
+
+.pi-table tbody tr:nth-child(even) td {
+  background: #fbfcfe;
+}
+
+/* ===== Input ===== */
+.pi-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+}
+
+.pi-input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+.pi-input[readonly] {
+  background: #f7f7f7;
+  color: #6b7280;
+}
+
+.pi-text-right {
+  text-align: right;
+}
+
+.pi-text-center {
+  text-align: center;
+}
+
+/* ===== Buttons ===== */
+.pi-btn {
+  padding: 10px 14px;
+  background: #111827;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pi-btn:hover {
+  background: #1f2937;
+}
+
+.pi-btn.outline {
+  background: transparent;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.pi-btn.outline:hover {
+  background: #f9fafb;
+}
+
+.pi-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.pi-icon-btn.danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.pi-icon-btn.danger:hover {
+  background: #fecaca;
+}
+
+/* ===== Totals Panel ===== */
+.pi-totals {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pi-totals-card {
+  width: 360px;
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.pi-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.pi-discount-input {
+  width: 150px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  text-align: right;
+  font-size: 14px;
+}
+
+.pi-discount-input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.07);
+}
+
+/* ===== Footer Buttons ===== */
+.pi-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}

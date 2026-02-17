@@ -1,16 +1,5 @@
-/* ===== Page layout ===== */
-.profile-page {
-  min-height: 85vh;
-  display: grid;
-  place-items: center;
-  background: #f5f7fb;
-  padding: 16px;
-}
-
 /* ===== Card container ===== */
 .profile-card {
-  width: 100%;
-  max-width: 480px;
   background: #ffffff;
   border: 1px solid #e6e9ef;
   border-radius: 12px;

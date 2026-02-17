@@ -66,6 +66,24 @@ async function removeFromSupabase(storagePath) {
   }
 }
 
+// --- LOOKUP by itemCode (e.g., 00001) ---
+router.get("/by-code/:itemCode", async (req, res) => {
+  try {
+    const code = (req.params.itemCode || "").trim();
+    if (!code) return res.status(400).json({ message: "Missing itemCode" });
+
+    const item = await InventoryItem.findOne({ itemCode: code })
+      .select("itemCode name category wsPrice rtPrice costPrice stockQuantity image")
+      .lean();
+
+    if (!item) return res.status(404).json({ message: "Item not found" });
+    return res.json(item);
+  } catch (err) {
+    console.error("by-code error:", err);
+    return res.status(500).json({ message: "Failed to fetch item by code" });
+  }
+});
+
 // --- Check code availability ---
 router.get("/check-code", async (req, res) => {
   try {

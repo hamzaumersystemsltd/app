@@ -186,47 +186,41 @@
   background: #fff1f0;
 }
 
-/* ========================= */
-/* ===== Avatar Button ===== */
-/* ========================= */
-
+/* Avatar button */
 .avatar-btn {
-  border: none;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  overflow: hidden;
-  outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
 }
 
-.avatar-btn:hover {
-  background: #f3f4f6;
-}
-
+/* Avatar image */
 .avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block; /* so onError can set display: none and show fallback */
 }
 
+/* Avatar fallback initials */
 .avatar-fallback {
-  width: 38px;
-  height: 38px;
-  background: #1f2937;
-  color: #ffffff;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #374151;
+  background: #f3f4f6;
+  border-radius: 50%;
 }
 
 /* Improve keyboard focus for text items (logout text) */

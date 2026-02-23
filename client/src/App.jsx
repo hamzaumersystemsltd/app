@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import AdminRoute from "./components/Routes/AdminRoute.jsx";
-import ProtectedRoute from "./components/Routes/ProtectedRoute.jsx";
-import PublicRoute from "./components/Routes/PublicRoute.jsx";
+import AdminRoute from "./Routes/AdminRoute.jsx";
+import ProtectedRoute from "./Routes/ProtectedRoute.jsx";
+import PublicRoute from "./Routes/PublicRoute.jsx";
 import Register from "./pages/Register/Register.jsx";
 import Login from "./pages/Login/Login.jsx";
 import Home from "./pages/Home/Home.jsx";

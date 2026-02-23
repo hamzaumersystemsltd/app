@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 /* ✅ Block login/register for logged-in users */
 function PublicRoute({ children }) {

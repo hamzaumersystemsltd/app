@@ -9,6 +9,7 @@ import "./InventoryList.css";
 import { FiRefreshCw, FiLoader, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 
 const API_BASE = "http://localhost:5000";
+const currency = "PKR";
 
 // Very small inline placeholder (1x1 gray pixel) used when item.image is missing
 const PLACEHOLDER_DATA_URL =
@@ -232,9 +233,9 @@ export default function InventoryList() {
                     <td>{item.itemCode}</td>
                     <td>{item.name}</td>
                     <td>{item.category}</td>
-                    <td>{item.wsPrice}</td>
-                    <td>{item.rtPrice}</td>
-                    <td>{item.costPrice}</td>
+                    <td>{item.wsPrice} {currency}</td>
+                    <td>{item.rtPrice} {currency}</td>
+                    <td>{item.costPrice} {currency}</td>
                     <td>{item.stockQuantity}</td>
 
                     <td>

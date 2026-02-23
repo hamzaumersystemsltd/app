@@ -260,7 +260,7 @@ export default function Nav() {
                   aria-label="User menu"
                   aria-haspopup="true"
                   aria-expanded={openAccount}
-                  onClick={() => setOpenAccount((o) => !o)} // click support
+                  onClick={() => setOpenAccount((o) => !o)}
                 >
                   {avatarUrl ? (
                     <img

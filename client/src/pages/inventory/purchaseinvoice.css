@@ -89,6 +89,7 @@
   background: #ffffff;
   font-size: 14px;
   color: #111827;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .pi-input:focus {
@@ -102,12 +103,21 @@
   color: #6b7280;
 }
 
-.pi-text-right {
-  text-align: right;
+.pi-text-right { text-align: right; }
+.pi-text-center { text-align: center; }
+
+/* ===== Input error state ===== */
+.pi-input.error {
+  border-color: #dc2626; /* red-600 */
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
 }
 
-.pi-text-center {
-  text-align: center;
+/* ===== Actions cell ===== */
+.pi-actions-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* ===== Buttons ===== */
@@ -122,19 +132,14 @@
   font-weight: 600;
 }
 
-.pi-btn:hover {
-  background: #1f2937;
-}
+.pi-btn:hover { background: #1f2937; }
 
 .pi-btn.outline {
   background: transparent;
   color: #374151;
   border: 1px solid #d1d5db;
 }
-
-.pi-btn.outline:hover {
-  background: #f9fafb;
-}
+.pi-btn.outline:hover { background: #f9fafb; }
 
 .pi-icon-btn {
   width: 40px;
@@ -144,23 +149,38 @@
   background: #ffffff;
   cursor: pointer;
   font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
 }
+.pi-icon-btn:hover { background: #f9fafb; border-color: #d1d5db; }
+.pi-icon-btn:active { transform: translateY(1px); }
+
+/* ===== Icon Variants ===== */
+.pi-icon-btn.info {
+  color: #2563eb;
+  border-color: #dbeafe;
+  background: #eff6ff;
+}
+.pi-icon-btn.info:hover { background: #dbeafe; }
+
+.pi-icon-btn.warn {
+  color: #d97706;
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+.pi-icon-btn.warn:hover { background: #fde68a; }
 
 .pi-icon-btn.danger {
-  background: #fef2f2;
   color: #dc2626;
   border-color: #fecaca;
+  background: #fef2f2;
 }
-
-.pi-icon-btn.danger:hover {
-  background: #fecaca;
-}
+.pi-icon-btn.danger:hover { background: #fecaca; }
 
 /* ===== Totals Panel ===== */
-.pi-totals {
-  display: flex;
-  justify-content: flex-end;
-}
+.pi-totals { display: flex; justify-content: flex-end; }
 
 .pi-totals-card {
   width: 360px;
@@ -186,7 +206,6 @@
   text-align: right;
   font-size: 14px;
 }
-
 .pi-discount-input:focus {
   border-color: #111827;
   box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.07);
@@ -197,6 +216,5 @@
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
-  display: flex;
   gap: 12px;
 }

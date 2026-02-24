@@ -185,14 +185,14 @@ export default function VendorList() {
             ) : (
               vendors.map((v) => (
                 <tr key={v._id}>
-                  <td>{v.vendorId}</td>
-                  <td>{v.name}</td>
-                  <td>{v.companyName || "-"}</td>
-                  <td>{v.email || "-"}</td>
-                  <td>{v.phone || "-"}</td>
-                  <td>{v.city || "-"}</td>
-                  <td>{v.status}</td>
-                  <td>
+                  <td className="pi-text-center">{v.vendorId}</td>
+                  <td className="pi-text-center">{v.name}</td>
+                  <td className="pi-text-center">{v.companyName || "-"}</td>
+                  <td className="pi-text-center">{v.email || "-"}</td>
+                  <td className="pi-text-center">{v.phone || "-"}</td>
+                  <td className="pi-text-center">{v.city || "-"}</td>
+                  <td className="pi-text-center">{v.status}</td>
+                  <td className="pi-text-center">
                     <div className="actions icons">
                       {/* View */}
                       <Tippy content="View" theme="material">

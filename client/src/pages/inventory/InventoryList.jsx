@@ -230,15 +230,15 @@ export default function InventoryList() {
                       </div>
                     </td>
 
-                    <td>{item.itemCode}</td>
-                    <td>{item.name}</td>
-                    <td>{item.category}</td>
-                    <td>{item.wsPrice} {currency}</td>
-                    <td>{item.rtPrice} {currency}</td>
-                    <td>{item.costPrice} {currency}</td>
-                    <td>{item.stockQuantity}</td>
+                    <td className="pi-text-center">{item.itemCode}</td>
+                    <td className="pi-text-center">{item.name}</td>
+                    <td className="pi-text-center">{item.category}</td>
+                    <td className="pi-text-center">{item.wsPrice} {currency}</td>
+                    <td className="pi-text-center">{item.rtPrice} {currency}</td>
+                    <td className="pi-text-center">{item.costPrice} {currency}</td>
+                    <td className="pi-text-center">{item.stockQuantity}</td>
 
-                    <td>
+                    <td className="pi-text-center">
                       <div className="actions icons">
                         <Tippy content="View" theme="material">
                           <Link

@@ -74,7 +74,7 @@ export async function createPurchaseInvoice(req, res) {
     // Compute totals
     const itemsWithTotals = normalized.map((n) => ({
       ...n,
-      vendorName: vendorMap[n.vendorId],  // 🔥 Save vendorName in invoice
+      vendorName: vendorMap[n.vendorId],
       lineTotal: Number((n.costPrice * n.quantity).toFixed(2)),
     }));
 
@@ -127,20 +127,77 @@ export async function listPurchaseInvoices(req, res) {
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
     const skip = (page - 1) * limit;
 
+    const { search, dateFrom, dateTo } = req.query;
+
+    const filter = {};
+
+    if (dateFrom || dateTo) {
+      filter.createdAt = {};
+      if (dateFrom) {
+        const from = new Date(dateFrom);
+        if (!isNaN(from)) filter.createdAt.$gte = from;
+      }
+      if (dateTo) {
+        const to = new Date(dateTo);
+        if (!isNaN(to)) {
+          to.setHours(23, 59, 59, 999);
+          filter.createdAt.$lte = to;
+        }
+      }
+    }
+
+    if (search && String(search).trim() !== "") {
+      const s = String(search).trim();
+      const maybeNumber = Number(s);
+
+      const orConditions = [];
+
+      // invoice number match
+      if (Number.isFinite(maybeNumber)) {
+        orConditions.push({ invoiceNo: maybeNumber });
+      }
+
+      // array field search using $elemMatch
+      orConditions.push({
+        items: {
+          $elemMatch: {
+            $or: [
+              { itemCode: new RegExp(s, "i") },
+              { name: new RegExp(s, "i") },
+              { vendorName: new RegExp(s, "i") },
+            ],
+          },
+        },
+      });
+
+      filter.$or = orConditions;
+    }
+
     const [items, total] = await Promise.all([
-      PurchaseInvoice.find()
+      PurchaseInvoice.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      PurchaseInvoice.countDocuments(),
+
+      PurchaseInvoice.countDocuments(filter),
     ]);
 
-    res.json({ items, total, page, limit });
+    return res.json({
+      items,
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
+    });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("listPurchaseInvoices error:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
   }
-};
+}
 
 export async function getPurchaseInvoiceById(req, res) {
   try {
@@ -156,4 +213,19 @@ export async function getPurchaseInvoiceById(req, res) {
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
   }
-};
+}
+
+export async function deletePurchaseInvoice(req, res) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(String(id))) {
+      return res.status(400).json({ message: "Invalid invoice id" });
+    }
+    const deleted = await PurchaseInvoice.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: "Invoice not found" });
+    return res.json({ message: "Invoice deleted" });
+  } catch (err) {
+    console.error("deletePurchaseInvoice error:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+}

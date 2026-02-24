@@ -202,6 +202,15 @@ export default function Nav() {
                       >
                         Purchase Invoice
                       </NavLink>
+
+                      <NavLink
+                        to="/inventory/purchase-invoices"
+                        className={({ isActive }) =>
+                          `dropdown-item ${isActive ? "active" : ""}`
+                        }
+                      >
+                        Purchase Invoice List
+                      </NavLink>
                     </div>
                   </div>
 

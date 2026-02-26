@@ -80,7 +80,7 @@ textarea.input {
 /* ===== Primary button ===== */
 .button {
   width: 100%;
-  margin-top: 6px;
+  margin-top: 12px; /* spacing below the two-column area */
   padding: 10px 14px;
   border: none;
   border-radius: 8px;
@@ -107,16 +107,22 @@ textarea.input {
 
 /* Optional secondary button */
 .button.secondary {
-  background: #f3f4f6;
-  color: #111827;
+  background: #111827;
+  color: #f3f4f6;
+}
+
+.button.secondary.small {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 12px;
+  margin-right: 8px;
 }
 
 /* ===== Error / info message ===== */
 .message {
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 12px;
   color: #dc2626;
-  text-align: center;
 }
 
 /* ===== Helper row ===== */
@@ -127,20 +133,106 @@ textarea.input {
   text-align: center;
 }
 
-/* ===== Form row grid for multi-column sections ===== */
+/* ===== Form row grid for multi-column sections (inside left column) ===== */
 .form-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
-/* Optional: 2-column helper if you want certain rows to be two columns
+/* 2-column helper if you want certain rows to be two columns
    Usage: <div className="form-row two">...</div> */
 .form-row.two {
   grid-template-columns: repeat(2, 1fr);
 }
 
+/* === Two-column layout wrapper for the entire form === */
+.addinventory-form .addinventory-layout {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr; /* left wider for fields */
+  gap: 18px;
+  align-items: center;
+}
+
+.form-left,
+.form-right {
+  width: 100%;
+}
+
+/* === Image panel (right column) === */
+.image-panel {
+  position: sticky; /* keeps preview in view while scrolling (desktop) */
+  top: 12px;
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  padding: 14px;
+  background: #fafafa;
+}
+
+/* Hide the native file input; we trigger it programmatically */
+.hidden-file-input {
+  display: none;
+}
+
+/* Clickable preview box (acts as the upload trigger) */
+.image-preview {
+  margin-top: 10px;
+  aspect-ratio: 1 / 1;  /* square preview box */
+  background: #fff;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+}
+
+/* Hover/keyboard focus affordance */
+.image-preview:hover {
+  border-color: #111827;
+  background-color: #fff;
+}
+.image-preview:focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 4px;
+}
+
+/* Placeholder text */
+.preview-placeholder {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+  padding: 0 8px;
+}
+
+/* The actual preview image */
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+}
+
+/* Small action row under preview (optional) */
+.image-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 /* When the card is narrower or on mobile, stack fields */
+@media (max-width: 900px) {
+  .addinventory-form .addinventory-layout {
+    grid-template-columns: 1fr;
+  }
+  .image-panel {
+    position: static; /* no sticky on mobile */
+  }
+}
+
+/* Adjust inner left-column rows on narrower screens */
 @media (max-width: 800px) {
   .addinventory-card {
     padding: 20px;

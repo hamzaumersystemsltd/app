@@ -5,7 +5,7 @@ import "tippy.js/themes/material.css";
 import { FiTrash2, FiEdit2, FiPlus } from "react-icons/fi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./purchaseinvoice.css";
+import "./Purchaseinvoice.css";
 
 const emptyRow = (id) => ({
   id,

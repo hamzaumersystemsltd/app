@@ -196,6 +196,19 @@
   background: #f5f7fb;
 }
 
+/* ===== Form row grid for multi-column sections (inside left column) ===== */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* 2-column helper if you want certain rows to be two columns
+   Usage: <div className="form-row two">...</div> */
+.form-row.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 /* ===== Inputs with number type: remove arrows ===== */
 #age::-webkit-outer-spin-button,
 #age::-webkit-inner-spin-button {
@@ -214,5 +227,16 @@
   }
   .actions {
     flex-direction: column-reverse;
+  }
+}
+
+/* Adjust inner left-column rows on narrower screens */
+@media (max-width: 800px) {
+  .addinventory-card {
+    padding: 20px;
+  }
+  .form-row,
+  .form-row.two {
+    grid-template-columns: 1fr;
   }
 }

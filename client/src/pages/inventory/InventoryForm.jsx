@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useRef } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
@@ -26,39 +26,18 @@ export async function checkItemCodeAvailable(code, token) {
   }
 }
 
-// --- Validation Schema (no meta fields on frontend) ---
+// --- Validation Schema (unchanged) ---
 export const InventorySchema = Yup.object({
   itemCode: Yup.string()
     .required("Item code is required")
     .matches(/^\d{5}$/, "Item code must be exactly 5 digits (e.g., 00001)"),
-  name: Yup.string()
-    .trim()
-    .min(2, "Min 2 characters")
-    .max(100, "Max 100 characters")
-    .required("Name is required"),
-  category: Yup.string()
-    .trim()
-    .min(2, "Min 2 characters")
-    .max(50, "Max 50 characters")
-    .required("Category is required"),
-
-  wsPrice: Yup.string()
-    .required("Wholesale price is required")
-    .matches(currencyRegex, "Enter a valid amount (e.g., 100 or 100.50)"),
-  rtPrice: Yup.string()
-    .required("Retail price is required")
-    .matches(currencyRegex, "Enter a valid amount (e.g., 100 or 100.50)"),
-  costPrice: Yup.string()
-    .required("Cost price is required")
-    .matches(currencyRegex, "Enter a valid amount (e.g., 100 or 100.50)"),
-
-  stockQuantity: Yup.number()
-    .typeError("Stock quantity must be a number")
-    .integer("Stock quantity must be an integer")
-    .min(0, "Stock quantity cannot be negative")
-    .required("Stock quantity is required"),
-
-  description: Yup.string().trim().max(500, "Max 500 characters"),
+  name: Yup.string().trim().min(2).max(100).required("Name is required"),
+  category: Yup.string().trim().min(2).max(50).required("Category is required"),
+  wsPrice: Yup.string().required().matches(currencyRegex),
+  rtPrice: Yup.string().required().matches(currencyRegex),
+  costPrice: Yup.string().required().matches(currencyRegex),
+  stockQuantity: Yup.number().typeError().integer().min(0).required(),
+  description: Yup.string().trim().max(500),
 }).test(
   "price-logic",
   "Retail should be ≥ wholesale and wholesale ≥ cost",
@@ -78,7 +57,10 @@ export default function InventoryForm({
   enableReinitialize = false,
   validateOnChange = false,
   token,
+  existingImage = null, // <-- ADDED
 }) {
+  const fileInputRef = useRef(null);
+
   return (
     <Formik
       initialValues={initialValues}
@@ -89,13 +71,22 @@ export default function InventoryForm({
       enableReinitialize={enableReinitialize}
     >
       {({ isSubmitting, setFieldValue, values, setFieldError, handleBlur }) => {
-        // Build a preview URL for the selected file
+        // Updated preview logic:
         const previewUrl = useMemo(() => {
           if (values.imageFile instanceof File) {
             return URL.createObjectURL(values.imageFile);
           }
+          if (existingImage) return existingImage; // <-- ADDED
           return null;
-        }, [values.imageFile]);
+        }, [values.imageFile, existingImage]);
+
+        useEffect(() => {
+          return () => {
+            if (previewUrl && values.imageFile instanceof File) {
+              URL.revokeObjectURL(previewUrl);
+            }
+          };
+        }, [previewUrl, values.imageFile]);
 
         const handleImageChange = (e) => {
           const file = e.currentTarget.files?.[0];
@@ -103,157 +94,140 @@ export default function InventoryForm({
             setFieldValue("imageFile", null);
             return;
           }
-          const maxSize = 5 * 1024 * 1024; // 5MB
           if (!file.type.startsWith("image/")) {
             setFieldError("imageFile", "Only image files are allowed");
             return;
           }
-          if (file.size > maxSize) {
+          if (file.size > 5 * 1024 * 1024) {
             setFieldError("imageFile", "Image must be ≤ 5MB");
             return;
           }
           setFieldValue("imageFile", file);
         };
 
+        const openFileDialog = () => fileInputRef.current?.click();
+
+        const clearImage = () => {
+          setFieldValue("imageFile", null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        };
+
         return (
-          <Form>
-            {/* 1) Name (full-width at the top) */}
-            <div className="form-group">
-              <label className="label" htmlFor="name">Name</label>
-              <Field id="name" name="name" className="input" />
-              <ErrorMessage name="name" component="div" className="message" />
-            </div>
+          <Form className="addinventory-form">
+            <div className="addinventory-layout">
+              {/* LEFT SIDE */}
+              <div className="form-left">
 
-            {/* 2) Single line: Item Code, Category, Stock Quantity */}
-            <div className="form-row">
-              <div className="form-group">
-                <label className="label" htmlFor="itemCode">Item Code</label>
-
-                {/* Digit-only field, max 5, placeholder updated to 00001 */}
-                <Field name="itemCode">
-                  {({ field, form: { setFieldValue, handleBlur, setFieldError } }) => (
-                    <input
-                      id="itemCode"
-                      {...field}
-                      className="input"
-                      inputMode="numeric"
-                      pattern="[0-9]{5}"
-                      maxLength={5}
-                      onChange={(e) => {
-                        const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
-                        setFieldValue("itemCode", onlyDigits);
-                      }}
-                      onBlur={async (e) => {
-                        handleBlur(e);
-                        const v = (e.target.value || "").trim();
-                        if (!/^\d{5}$/.test(v)) return;
-                        const available = await checkItemCodeAvailable(v, token);
-                        if (!available) setFieldError("itemCode", "This item code already exists");
-                      }}
-                    />
-                  )}
-                </Field>
-
-                <ErrorMessage name="itemCode" component="div" className="message" />
-              </div>
-
-              <div className="form-group">
-                <label className="label" htmlFor="category">Category</label>
-                <Field
-                  id="category"
-                  name="category"
-                  className="input"
-                />
-                <ErrorMessage name="category" component="div" className="message" />
-              </div>
-
-              <div className="form-group">
-                <label className="label" htmlFor="stockQuantity">Stock Quantity</label>
-                <Field
-                  id="stockQuantity"
-                  name="stockQuantity"
-                  className="input"
-                  inputMode="numeric"
-                />
-                <ErrorMessage name="stockQuantity" component="div" className="message" />
-              </div>
-            </div>
-
-            {/* 3) Prices (single line) */}
-            <div className="form-row">
-              <div className="form-group">
-                <label className="label" htmlFor="wsPrice">Wholesale Price</label>
-                <Field
-                  id="wsPrice"
-                  name="wsPrice"
-                  className="input"
-                  inputMode="decimal"
-                />
-                <ErrorMessage name="wsPrice" component="div" className="message" />
-              </div>
-
-              <div className="form-group">
-                <label className="label" htmlFor="rtPrice">Retail Price</label>
-                <Field
-                  id="rtPrice"
-                  name="rtPrice"
-                  className="input"
-                  inputMode="decimal"
-                />
-                <ErrorMessage name="rtPrice" component="div" className="message" />
-              </div>
-
-              <div className="form-group">
-                <label className="label" htmlFor="costPrice">Cost Price</label>
-                <Field
-                  id="costPrice"
-                  name="costPrice"
-                  className="input"
-                  inputMode="decimal"
-                />
-                <ErrorMessage name="costPrice" component="div" className="message" />
-              </div>
-            </div>
-
-            {/* 4) Description */}
-            <div className="form-group">
-              <label className="label" htmlFor="description">Description</label>
-              <Field
-                id="description"
-                name="description"
-                as="textarea"
-                className="input"
-              />
-              <ErrorMessage name="description" component="div" className="message" />
-            </div>
-
-            {/* 5) Image Upload */}
-            <div className="form-group">
-              <label className="label" htmlFor="imageFile">Image</label>
-              <input
-                id="imageFile"
-                name="imageFile"
-                type="file"
-                accept="image/*"
-                className="input"
-                onChange={handleImageChange}
-                onBlur={handleBlur}
-              />
-              <ErrorMessage name="imageFile" component="div" className="message" />
-              {previewUrl && (
-                <div style={{ marginTop: 8 }}>
-                  <img
-                    src={previewUrl}
-                    alt="preview"
-                    style={{ maxWidth: 180, maxHeight: 180, borderRadius: 6, border: '1px solid #ddd' }}
-                  />
+                {/* Name */}
+                <div className="form-group">
+                  <label className="label">Name</label>
+                  <Field name="name" className="input" />
+                  <ErrorMessage name="name" className="message" component="div" />
                 </div>
-              )}
-            </div>
 
-            <button className="button" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : submitLabel}
-            </button>
+                {/* Row: itemCode, category, stock */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="label">Item Code</label>
+                    <Field name="itemCode">
+                      {({ field }) => (
+                        <input
+                          {...field}
+                          className="input"
+                          maxLength={5}
+                          inputMode="numeric"
+                          onChange={(e) => {
+                            const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
+                            setFieldValue("itemCode", onlyDigits);
+                          }}
+                        />
+                      )}
+                    </Field>
+                    <ErrorMessage name="itemCode" className="message" component="div" />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="label">Category</label>
+                    <Field name="category" className="input" />
+                    <ErrorMessage name="category" className="message" component="div" />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="label">Stock</label>
+                    <Field name="stockQuantity" className="input" />
+                    <ErrorMessage name="stockQuantity" className="message" component="div" />
+                  </div>
+                </div>
+
+                {/* Prices */}
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="label">Wholesale</label>
+                    <Field name="wsPrice" className="input" />
+                    <ErrorMessage name="wsPrice" component="div" className="message" />
+                  </div>
+                  <div className="form-group">
+                    <label className="label">Retail</label>
+                    <Field name="rtPrice" className="input" />
+                    <ErrorMessage name="rtPrice" component="div" className="message" />
+                  </div>
+                  <div className="form-group">
+                    <label className="label">Cost</label>
+                    <Field name="costPrice" className="input" />
+                    <ErrorMessage name="costPrice" component="div" className="message" />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="form-group">
+                  <label className="label">Description</label>
+                  <Field as="textarea" name="description" className="input" />
+                  <ErrorMessage name="description" className="message" component="div" />
+                </div>
+
+                {/* Submit */}
+                <button className="button" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Saving..." : submitLabel}
+                </button>
+              </div>
+
+              {/* RIGHT SIDE - IMAGE */}
+              <div className="form-right">
+                <div className="image-panel">
+                  <label className="label">Product Image</label>
+
+                  {/* Hidden input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden-file-input"
+                    onChange={handleImageChange}
+                  />
+
+                  {/* Clickable Preview */}
+                  <div className="image-preview" onClick={openFileDialog}>
+                    {previewUrl ? (
+                      <img src={previewUrl} className="preview-img" alt="Preview" />
+                    ) : (
+                      <div className="preview-placeholder">Click to upload image</div>
+                    )}
+                  </div>
+
+                  {/* Optional remove/change buttons */}
+                  {previewUrl && (
+                    <div className="image-actions">
+                      <button type="button" className="button secondary small" onClick={clearImage}>
+                        Remove
+                      </button>
+                      <button type="button" className="button secondary small" onClick={openFileDialog}>
+                        Change
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </Form>
         );
       }}

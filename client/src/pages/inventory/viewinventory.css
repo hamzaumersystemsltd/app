@@ -24,67 +24,7 @@
   text-align: center;
 }
 
-/* ===== Section labels ===== */
-.view-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 4px;
-}
-
-/* ===== Field value styling ===== */
-.view-value {
-  font-size: 14px;
-  color: #111827;
-  background: #f9fafb;
-  padding: 10px 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-}
-
-/* ===== Grid layout for details ===== */
-.view-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 12px;
-}
-
-.view-grid.two {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-/* ===== Responsive breakpoints ===== */
-@media (max-width: 800px) {
-  .view-grid,
-  .view-grid.two {
-    grid-template-columns: 1fr;
-  }
-  .viewinventory-card {
-    padding: 20px;
-  }
-}
-
-/* ===== Description box ===== */
-.view-description {
-  margin-top: 20px;
-}
-
-.view-description .view-value {
-  min-height: 80px;
-  line-height: 1.4;
-}
-
-/* ===== Footer ===== */
-.view-footer {
-  border-top: 1px solid #e5e7eb;
-  margin-top: 20px;
-  padding-top: 14px;
-  font-size: 12px;
-  color: #6b7280;
-}
-
-/* ===== Buttons ===== */
+/* ===== Actions row ===== */
 .view-actions {
   display: flex;
   justify-content: space-between;
@@ -112,10 +52,133 @@
 }
 
 .button-secondary {
+  padding: 10px 16px;
+  border-radius: 8px;
   background: #f3f4f6;
   color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s ease;
 }
 
 .button-secondary:hover {
   background: #e5e7eb;
+}
+
+/* ===================================================
+   === TWO-COLUMN LAYOUT (matches Add/Edit UI) ===
+   =================================================== */
+.viewinventory-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.view-left,
+.view-right {
+  width: 100%;
+}
+
+/* ===== Right/Image Column ===== */
+.view-right {
+  text-align: center;
+}
+
+.view-image {
+  width: 100%;
+  height: 320px;
+  object-fit: fill;
+  border-radius: 10px;
+  border: 1px solid #e6e9ef;
+  background: #fff;
+  display: block;
+  margin: 0 auto;
+}
+
+.view-image-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===================================================
+   ======= Left Column Fields (Text Details) =======
+   =================================================== */
+
+/* Section labels */
+.view-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+/* Field value styling */
+.view-value {
+  font-size: 14px;
+  color: #111827;
+  background: #f9fafb;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* Grid layout for details */
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.view-grid.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Description Box */
+.view-description {
+  margin-top: 20px;
+}
+
+.view-description .view-value {
+  min-height: 80px;
+  line-height: 1.4;
+}
+
+/* Footer Meta */
+.view-footer {
+  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+  padding-top: 14px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===================================================
+   =============== Responsive Mobile ==================
+   =================================================== */
+
+@media (max-width: 900px) {
+  .viewinventory-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .view-right {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 800px) {
+  .view-grid,
+  .view-grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .viewinventory-card {
+    padding: 20px;
+  }
 }

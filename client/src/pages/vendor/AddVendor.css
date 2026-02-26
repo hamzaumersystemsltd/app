@@ -103,8 +103,8 @@ textarea.input {
 }
 
 .button.secondary {
-  background: #f3f4f6;
-  color: #111827;
+  background: #111827;
+  color: #f3f4f6;
 }
 
 /* ===== Error / info message ===== */

@@ -77,7 +77,7 @@ export default function VendorForm({
           </div>
 
           {/* 2) Vendor ID (unique), Company Name */}
-          <div className="form-row">
+          <div className="form-row two">
             <div className="form-group">
               <label className="label" htmlFor="vendorId">Vendor ID</label>
 
@@ -138,13 +138,6 @@ export default function VendorForm({
             </div>
           </div>
 
-          {/* 4) Address */}
-          <div className="form-group">
-            <label className="label" htmlFor="address">Address</label>
-            <Field id="address" name="address" as="textarea" className="input" />
-            <ErrorMessage name="address" component="div" className="message" />
-          </div>
-
           <div className="form-row">
             <div className="form-group">
               <label className="label" htmlFor="city">City</label>
@@ -166,6 +159,13 @@ export default function VendorForm({
               </Field>
               <ErrorMessage name="status" component="div" className="message" />
             </div>
+          </div>
+
+          {/* 4) Address */}
+          <div className="form-group">
+            <label className="label" htmlFor="address">Address</label>
+            <Field id="address" name="address" as="textarea" className="input" />
+            <ErrorMessage name="address" component="div" className="message" />
           </div>
 
           <button className="button" type="submit" disabled={isSubmitting}>

@@ -8,16 +8,6 @@ import InventoryForm, {
 } from "./InventoryForm";
 import "./AddInventory.css";
 
-// Tiny inline placeholder when no image is available
-const PLACEHOLDER_DATA_URL =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='320' height='240'>
-      <rect width='100%' height='100%' fill='#f7f7f7'/>
-      <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#bdbdbd' font-size='16' font-family='sans-serif'>No Image</text>
-    </svg>`
-  );
-
 export default function EditInventory({ authToken }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -154,11 +144,6 @@ export default function EditInventory({ authToken }) {
     return <h3 className="text-center mt-4">Item not found</h3>;
   }
 
-  const currentImgSrc = serverItem?.image || PLACEHOLDER_DATA_URL;
-  const currentImgAlt = serverItem?.name
-    ? `${serverItem.name} current image`
-    : "current item image";
-
   return (
     <div className="addinventory-page">
       <div className="addinventory-card">
@@ -167,46 +152,6 @@ export default function EditInventory({ authToken }) {
           Update item details and save changes
         </p>
 
-        {/* Current image preview (click to open full size if exists) */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 13, color: "#374151", marginBottom: 6 }}>
-            Current Image
-          </div>
-          <a
-            href={serverItem?.image || "#"}
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Open image in new tab"
-            onClick={(e) => {
-              if (!serverItem?.image) e.preventDefault();
-            }}
-          >
-            <img
-              src={currentImgSrc}
-              alt={currentImgAlt}
-              loading="lazy"
-              onError={(e) => {
-                e.currentTarget.src = PLACEHOLDER_DATA_URL;
-              }}
-              style={{
-                width: "100%",
-                maxWidth: 220,
-                height: 220,
-                objectFit: "cover",
-                borderRadius: 10,
-                border: "1px solid #e6e9ef",
-                background: "#fff",
-                display: "block",
-              }}
-            />
-          </a>
-          <div style={{ marginTop: 6, fontSize: 12, color: "#6b7280" }}>
-            {serverItem?.image
-              ? "Select a new image below to replace the current one."
-              : "No image uploaded yet. You can upload one below."}
-          </div>
-        </div>
-
         <InventoryForm
           initialValues={initialValues}
           onSubmit={handleUpdate}
@@ -214,6 +159,7 @@ export default function EditInventory({ authToken }) {
           enableReinitialize
           validateOnChange={false}
           token={token}
+          existingImage={serverItem?.image}
         />
       </div>
     </div>

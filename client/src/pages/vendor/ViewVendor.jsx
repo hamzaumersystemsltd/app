@@ -137,7 +137,7 @@ export default function ViewVendor() {
 
           <button
             className="button-view"
-            onClick={() => navigate(`/vendor/edit/${vendor._id}`)}
+            onClick={() => navigate(`/vendor/vendor-list/${vendor._id}/edit`)}
           >
             Edit Vendor
           </button>

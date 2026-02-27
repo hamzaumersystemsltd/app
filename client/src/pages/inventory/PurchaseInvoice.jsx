@@ -6,6 +6,7 @@ import { FiTrash2, FiEdit2, FiPlus } from "react-icons/fi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Purchaseinvoice.css";
+import axios from "axios";
 
 const emptyRow = (id) => ({
   id,
@@ -154,45 +155,12 @@ export default function PurchaseInvoice() {
     if (mergedIntoId) return false;
 
     try {
-      const url = `${API_BASE}/api/inventory/by-code/${encodeURIComponent(code)}`;
+      const url = `${API_BASE}/api/inventory/by-code/${encodeURIComponent(
+        code
+      )}`;
 
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          ...authHeaders,
-          Accept: "application/json",
-        },
-      });
-
-      if (!res.ok) {
-        const ct = res.headers.get("content-type") || "";
-        if (ct.includes("application/json")) {
-          const errJson = await res.json().catch(() => ({}));
-          toast.error(errJson?.message || `Error fetching item ${code}.`, {
-            autoClose: 1800,
-          });
-        } else {
-          const t = await res.text().catch(() => "");
-          toast.error(`Fetch error (${res.status}). ${t.slice(0, 120)}...`, {
-            autoClose: 1800,
-          });
-        }
-        updateRow(row.id, { codeError: true });
-        return false;
-      }
-
-      const ct = res.headers.get("content-type") || "";
-      if (!ct.includes("application/json")) {
-        const html = await res.text();
-        console.error("Non-JSON response:", html.slice(0, 200));
-        toast.error("Unexpected server response (not JSON).", {
-          autoClose: 1800,
-        });
-        updateRow(row.id, { codeError: true });
-        return false;
-      }
-
-      const item = await res.json();
+      const res = await axios.get(url, { headers: authHeaders });
+      const item = res.data;
 
       updateRow(row.id, {
         name: item.name,
@@ -206,8 +174,10 @@ export default function PurchaseInvoice() {
 
       return true;
     } catch (err) {
-      console.error(err);
-      toast.error("Network error while fetching item.", { autoClose: 1800 });
+      toast.error(
+        err.response?.data?.message || "Network error while fetching item.",
+        { autoClose: 1800 }
+      );
       updateRow(row.id, { codeError: true });
       return false;
     }
@@ -279,44 +249,24 @@ export default function PurchaseInvoice() {
   const loadVendors = async () => {
     try {
       setVendorsLoading(true);
-      const res = await fetch(`${API_BASE}/api/vendors`, {
-        method: "GET",
-        headers: {
-          ...authHeaders,
-          Accept: "application/json",
-        },
+
+      const res = await axios.get(`${API_BASE}/api/vendors`, {
+        headers: authHeaders,
       });
 
-      if (!res.ok) {
-        const ct = res.headers.get("content-type") || "";
-        if (ct.includes("application/json")) {
-          const err = await res.json().catch(() => ({}));
-          toast.error(err?.message || "Failed to load vendors", { autoClose: 1800 });
-        } else {
-          const t = await res.text().catch(() => "");
-          toast.error(`Vendors error (${res.status}): ${t.slice(0, 120)}...`, {
-            autoClose: 1800,
-          });
-        }
-        return;
-      }
+      const data = res.data;
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+        ? data.items
+        : [];
 
-      const ct = res.headers.get("content-type") || "";
-      if (!ct.includes("application/json")) {
-        const html = await res.text();
-        console.error("Vendors non-JSON:", html.slice(0, 200));
-        toast.error("Unexpected vendor list response (not JSON).", {
-          autoClose: 1800,
-        });
-        return;
-      }
-
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
       setVendors(list);
     } catch (e) {
-      console.error(e);
-      toast.error("Network error while loading vendors.", { autoClose: 1800 });
+      toast.error(
+        e.response?.data?.message || "Network error while loading vendors.",
+        { autoClose: 1800 }
+      );
     } finally {
       setVendorsLoading(false);
     }
@@ -378,31 +328,13 @@ export default function PurchaseInvoice() {
 
     try {
       const url = `${API_BASE}/api/purchases/invoices`;
-      const res = await fetch(url, {
-        method: "POST",
+
+      await axios.post(url, payload, {
         headers: {
           "Content-Type": "application/json",
           ...authHeaders,
-          Accept: "application/json",
         },
-        body: JSON.stringify(payload),
       });
-
-      if (!res.ok) {
-        const ct = res.headers.get("content-type") || "";
-        if (ct.includes("application/json")) {
-          const errJson = await res.json().catch(() => ({}));
-          toast.error(errJson?.message || "Failed to save invoice.", {
-            autoClose: 1800,
-          });
-        } else {
-          const t = await res.text().catch(() => "");
-          toast.error(`Save error (${res.status}): ${t.slice(0, 120)}...`, {
-            autoClose: 1800,
-          });
-        }
-        return;
-      }
 
       toast.success("Purchase invoice saved successfully!", {
         autoClose: 1400,
@@ -413,8 +345,9 @@ export default function PurchaseInvoice() {
       setDiscount(0);
       setTimeout(() => focusItemCode(1), 30);
     } catch (err) {
-      console.error(err);
-      toast.error("Error saving invoice.", { autoClose: 1800 });
+      toast.error(err.response?.data?.message || "Error saving invoice.", {
+        autoClose: 1800,
+      });
     }
   };
 
@@ -434,10 +367,15 @@ export default function PurchaseInvoice() {
 
       if (isSaveCombo) {
         e.preventDefault();
-        if (formRef.current && typeof formRef.current.requestSubmit === "function") {
+        if (
+          formRef.current &&
+          typeof formRef.current.requestSubmit === "function"
+        ) {
           formRef.current.requestSubmit();
         } else if (formRef.current) {
-          formRef.current.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+          formRef.current.dispatchEvent(
+            new Event("submit", { cancelable: true, bubbles: true })
+          );
         }
       }
     };
@@ -459,7 +397,11 @@ export default function PurchaseInvoice() {
         </p>
       </div>
 
-      <form ref={formRef} onSubmit={handleSubmit} onKeyDown={handleFormKeyDown}>
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        onKeyDown={handleFormKeyDown}
+      >
         <div className="pi-table-wrap">
           <table className="pi-table">
             <thead>
@@ -517,7 +459,9 @@ export default function PurchaseInvoice() {
                   <td>
                     <input
                       ref={(el) => (inputRefs.current[`qty-${row.id}`] = el)}
-                      className={`pi-input pi-text-right ${row.qtyError ? "error" : ""}`}
+                      className={`pi-input pi-text-right ${
+                        row.qtyError ? "error" : ""
+                      }`}
                       type="number"
                       min={0}
                       value={row.quantity}
@@ -533,7 +477,9 @@ export default function PurchaseInvoice() {
                       className={`pi-input ${row.vendorError ? "error" : ""}`}
                       value={row.vendorId}
                       disabled={!row.locked || vendorsLoading}
-                      onChange={(e) => handleVendorChange(row.id, e.target.value)}
+                      onChange={(e) =>
+                        handleVendorChange(row.id, e.target.value)
+                      }
                       onKeyDown={(e) => handleVendorKeyDown(e, row)}
                     >
                       <option value="">
@@ -562,7 +508,9 @@ export default function PurchaseInvoice() {
                   <td className="pi-actions-cell">
                     <Tippy content="Add row" theme="material" delay={[150, 0]}>
                       <button
-                        ref={(el) => (inputRefs.current[`btn-add-${row.id}`] = el)}
+                        ref={(el) =>
+                          (inputRefs.current[`btn-add-${row.id}`] = el)
+                        }
                         type="button"
                         className="pi-icon-btn info"
                         aria-label="Add row"
@@ -575,7 +523,9 @@ export default function PurchaseInvoice() {
 
                     <Tippy content="Edit row" theme="material" delay={[150, 0]}>
                       <button
-                        ref={(el) => (inputRefs.current[`btn-edit-${row.id}`] = el)}
+                        ref={(el) =>
+                          (inputRefs.current[`btn-edit-${row.id}`] = el)
+                        }
                         type="button"
                         className="pi-icon-btn warn"
                         aria-label="Edit row"
@@ -591,9 +541,15 @@ export default function PurchaseInvoice() {
                       </button>
                     </Tippy>
 
-                    <Tippy content="Remove row" theme="material" delay={[150, 0]}>
+                    <Tippy
+                      content="Remove row"
+                      theme="material"
+                      delay={[150, 0]}
+                    >
                       <button
-                        ref={(el) => (inputRefs.current[`btn-del-${row.id}`] = el)}
+                        ref={(el) =>
+                          (inputRefs.current[`btn-del-${row.id}`] = el)
+                        }
                         type="button"
                         className="pi-icon-btn danger"
                         disabled={rows.length === 1}

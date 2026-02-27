@@ -140,7 +140,7 @@ export default function ViewInventory() {
 
         <button
           className="button-view"
-          onClick={() => navigate(`/inventory/edit/${item._id}`)}
+          onClick={() => navigate(`/inventory/inventory-list/${item._id}/edit`)}
         >
           Edit Item
         </button>

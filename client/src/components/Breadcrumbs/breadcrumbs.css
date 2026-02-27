@@ -1,0 +1,86 @@
+/* Container: subtle surface + bottom divider */
+.bc-container {
+  background: #ffffff;
+  padding: 12px 20px;
+  border-bottom: 1px solid #e6e9ef;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* List layout */
+.bc-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Each crumb */
+.bc-item {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  color: #374151;
+}
+
+/* Separator */
+.bc-sep {
+  color: #6b7280;
+  margin: 0 6px 0 2px;
+  user-select: none;
+}
+
+/* Links (interactive) */
+.bc-link {
+  text-decoration: none;
+  color: #111827;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bc-link:hover {
+  color: #1f2937;
+  background: #f9fafb;
+}
+
+.bc-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.12);
+}
+
+/* Non-clickable last crumb (if you ever render as span) */
+.bc-item:last-child .bc-link,
+.bc-item:last-child .bc-current {
+  color: #111827;
+  font-weight: 800;
+  cursor: default;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* Optional: condensed when inside a card header, if needed */
+.bc--inset {
+  padding: 8px 16px;
+}
+
+/* Responsive: tighten spacing on small screens */
+@media (max-width: 640px) {
+  .bc-container {
+    padding: 10px 14px;
+  }
+  .bc-list {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .bc-link {
+    padding: 3px 5px;
+    font-size: 12px;
+  }
+  .bc-sep {
+    margin: 0 4px 0 2px;
+    font-size: 12px;
+  }
+}

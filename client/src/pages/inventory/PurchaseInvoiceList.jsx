@@ -276,7 +276,7 @@ export default function PurchaseInvoiceList() {
                     <div className="actions">
                       <Tippy content="View" theme="material">
                         <Link
-                          to={`/inventory/invoices/${inv._id}`}
+                          to={`/inventory/purchase-invoices/${inv._id}`}
                           className="icon-button info"
                           aria-label="View"
                         >

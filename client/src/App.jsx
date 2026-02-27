@@ -22,12 +22,14 @@ import AddVendor from "./pages/vendor/AddVendor.jsx";
 import VendorList from "./pages/vendor/VendorList.jsx";
 import EditVendor from "./pages/vendor/EditVendor.jsx";
 import ViewVendor from "./pages/vendor/ViewVendor.jsx";
+import Breadcrumbs from "./components/Breadcrumbs/Breadcrumbs.jsx"
 import "react-toastify/dist/ReactToastify.css";
 
 export default function App() {
   return (
     <Router>
       <Nav />
+      <Breadcrumbs />
 
       <ToastContainer
         position="bottom-right"
@@ -82,9 +84,9 @@ export default function App() {
           <Route path="inventory-list" element={<InventoryList />} />
           <Route path="purchase-invoice" element={<PurchaseInvoice />} />
           <Route path="purchase-invoices" element={<PurchaseInvoiceList />} />
-          <Route path="invoices/:id" element={<PurchaseInvoiceView />} />
-          <Route path="edit/:id" element={<EditInventory />} />
-          <Route path="view/:id" element={<ViewInventory />} />
+          <Route path="purchase-invoices/:id" element={<PurchaseInvoiceView />} />
+          <Route path="inventory-list/:id/edit" element={<EditInventory />} />
+          <Route path="inventory-list/:id" element={<ViewInventory />} />
         </Route>
 
         {/* ✅ ADMIN: VENDOR (Nested) */}
@@ -100,8 +102,8 @@ export default function App() {
         >
           <Route path="add-vendor" element={<AddVendor />} />
           <Route path="vendor-list" element={<VendorList />} />
-          <Route path="edit/:id" element={<EditVendor />} />
-          <Route path="view/:id" element={<ViewVendor />} />
+          <Route path="vendor-list/:id/edit" element={<EditVendor />} />
+          <Route path="vendor-list/:id" element={<ViewVendor />} />
         </Route>
 
         {/* ✅ Public */}

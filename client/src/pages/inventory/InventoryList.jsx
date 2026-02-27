@@ -242,7 +242,7 @@ export default function InventoryList() {
                       <div className="actions icons">
                         <Tippy content="View" theme="material">
                           <Link
-                            to={`/inventory/view/${item._id}`}
+                            to={`/inventory/inventory-list/${item._id}`}
                             className="icon-button info"
                           >
                             <FiEye size={18} />
@@ -251,7 +251,7 @@ export default function InventoryList() {
 
                         <Tippy content="Edit" theme="material">
                           <Link
-                            to={`/inventory/edit/${item._id}`}
+                            to={`/inventory/inventory-list/${item._id}/edit`}
                             className="icon-button warn"
                           >
                             <FiEdit2 size={18} />

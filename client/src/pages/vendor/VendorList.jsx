@@ -196,14 +196,14 @@ export default function VendorList() {
                     <div className="actions icons">
                       {/* View */}
                       <Tippy content="View" theme="material">
-                        <Link to={`/vendor/view/${v._id}`} className="icon-button info">
+                        <Link to={`/vendor/vendor-list/${v._id}`} className="icon-button info">
                           <FiEye size={18} />
                         </Link>
                       </Tippy>
 
                       {/* Edit */}
                       <Tippy content="Edit" theme="material">
-                        <Link to={`/vendor/edit/${v._id}`} className="icon-button warn">
+                        <Link to={`/vendor/vendor-list/${v._id}/edit`} className="icon-button warn">
                           <FiEdit2 size={18} />
                         </Link>
                       </Tippy>

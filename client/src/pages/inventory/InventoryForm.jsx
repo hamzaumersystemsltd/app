@@ -57,7 +57,7 @@ export default function InventoryForm({
   enableReinitialize = false,
   validateOnChange = false,
   token,
-  existingImage = null, // <-- ADDED
+  existingImage = null,
 }) {
   const fileInputRef = useRef(null);
 
@@ -76,7 +76,7 @@ export default function InventoryForm({
           if (values.imageFile instanceof File) {
             return URL.createObjectURL(values.imageFile);
           }
-          if (existingImage) return existingImage; // <-- ADDED
+          if (existingImage) return existingImage;
           return null;
         }, [values.imageFile, existingImage]);
 
@@ -106,11 +106,6 @@ export default function InventoryForm({
         };
 
         const openFileDialog = () => fileInputRef.current?.click();
-
-        const clearImage = () => {
-          setFieldValue("imageFile", null);
-          if (fileInputRef.current) fileInputRef.current.value = "";
-        };
 
         return (
           <Form className="addinventory-form">
@@ -213,18 +208,6 @@ export default function InventoryForm({
                       <div className="preview-placeholder">Click to upload image</div>
                     )}
                   </div>
-
-                  {/* Optional remove/change buttons */}
-                  {previewUrl && (
-                    <div className="image-actions">
-                      <button type="button" className="button secondary small" onClick={clearImage}>
-                        Remove
-                      </button>
-                      <button type="button" className="button secondary small" onClick={openFileDialog}>
-                        Change
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

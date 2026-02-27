@@ -323,30 +323,8 @@ export default function EditProfile() {
                       <div className="image-preview" onClick={() => fileRef.current.click()}>
                         <img src={previewImage} className="preview-img" alt="Preview" />
                       </div>
-
-                      <div className="image-actions">
-                        <button
-                          type="button"
-                          className="button secondary small"
-                          onClick={() => {
-                            setFieldValue("profileImage", null);
-                            if (fileRef.current) fileRef.current.value = "";
-                          }}
-                        >
-                          Remove
-                        </button>
-
-                        <button
-                          type="button"
-                          className="button secondary small"
-                          onClick={() => fileRef.current.click()}
-                        >
-                          Change
-                        </button>
-                      </div>
                     </div>
                   </div>
-
                 </div>
               </Form>
             );

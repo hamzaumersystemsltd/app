@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./ViewVendor.css";
 
@@ -7,8 +7,6 @@ const API_BASE = "http://localhost:5000";
 
 export default function ViewVendor() {
   const { id } = useParams();
-  const navigate = useNavigate();
-
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
@@ -59,164 +57,122 @@ export default function ViewVendor() {
   /* ---------------------------- LOADING STATE ---------------------------- */
   if (loading) {
     return (
-      // <div className="viewvendor-page">
-        <div className="viewvendor-card">
-          <h3 className="viewvendor-title">Loading vendor details...</h3>
-        </div>
-      // </div>
+      <div className="viewvendor-card">
+        <h3 className="viewvendor-title">Loading vendor details...</h3>
+      </div>
     );
   }
 
   /* ----------------------------- ERROR STATE ----------------------------- */
   if (errMsg) {
     return (
-      // <div className="viewvendor-page">
-        <div className="viewvendor-card">
-          <h3 className="viewvendor-title">Vendor Details</h3>
-          <p className="viewvendor-subtitle">Something went wrong</p>
+      <div className="viewvendor-card">
+        <h3 className="viewvendor-title">Vendor Details</h3>
+        <p className="viewvendor-subtitle">Something went wrong</p>
 
-          <div
-            className="view-value"
-            style={{
-              borderColor: "#fecaca",
-              background: "#fef2f2",
-              color: "#991b1b",
-            }}
-          >
-            {errMsg}
-          </div>
-
-          <div className="view-actions" style={{ marginTop: 16 }}>
-            <button
-              className="button-secondary"
-              onClick={() => navigate("/vendor/vendor-list")}
-            >
-              Back to List
-            </button>
-          </div>
+        <div
+          className="view-value"
+          style={{
+            borderColor: "#fecaca",
+            background: "#fef2f2",
+            color: "#991b1b",
+          }}
+        >
+          {errMsg}
         </div>
-      // </div>
+      </div>
     );
   }
 
   /* ---------------------------- NOT FOUND STATE --------------------------- */
   if (!vendor) {
     return (
-      // <div className="viewvendor-page">
-        <div className="viewvendor-card">
-          <h3 className="viewvendor-title">Vendor not found</h3>
-          <div className="view-actions" style={{ marginTop: 16 }}>
-            <button
-              className="button-secondary"
-              onClick={() => navigate("/vendor/vendor-list")}
-            >
-              Back to List
-            </button>
-          </div>
-        </div>
-      // </div>
+      <div className="viewvendor-card">
+        <h3 className="viewvendor-title">Vendor not found</h3>
+      </div>
     );
   }
 
   /* ------------------------------ MAIN VIEW ------------------------------- */
   return (
-    // <div className="viewvendor-page">
-      <div className="viewvendor-card">
-        {/* Header */}
-        <h3 className="viewvendor-title">Vendor Details</h3>
-        <p className="viewvendor-subtitle">Here are the full vendor details</p>
+    <div className="viewvendor-card">
+      {/* Header */}
+      <h3 className="viewvendor-title">Vendor Details</h3>
+      <p className="viewvendor-subtitle">Here are the full vendor details</p>
 
-        {/* Actions */}
-        <div className="view-actions">
-          <button
-            className="button-secondary"
-            onClick={() => navigate("/vendor/vendor-list")}
-          >
-            Back
-          </button>
-
-          <button
-            className="button-view"
-            onClick={() => navigate(`/vendor/vendor-list/${vendor._id}/edit`)}
-          >
-            Edit Vendor
-          </button>
+      {/* A) Vendor ID + Name */}
+      <div className="view-grid two" style={{ marginTop: 8 }}>
+        <div>
+          <div className="view-label">Vendor ID</div>
+          <div className="view-value">{vendor.vendorId}</div>
         </div>
 
-        {/* A) Vendor ID + Name */}
-        <div className="view-grid two" style={{ marginTop: 8 }}>
-          <div>
-            <div className="view-label">Vendor ID</div>
-            <div className="view-value">{vendor.vendorId}</div>
-          </div>
-
-          <div>
-            <div className="view-label">Name</div>
-            <div className="view-value">{vendor.name}</div>
-          </div>
-        </div>
-
-        {/* B) Company + Contact Person + Status */}
-        <div className="view-grid" style={{ marginTop: 8 }}>
-          <div>
-            <div className="view-label">Company Name</div>
-            <div className="view-value">{vendor.companyName || "—"}</div>
-          </div>
-
-          <div>
-            <div className="view-label">Contact Person</div>
-            <div className="view-value">{vendor.contactPerson || "—"}</div>
-          </div>
-
-          <div>
-            <div className="view-label">Status</div>
-            <div className="view-value">{vendor.status}</div>
-          </div>
-        </div>
-
-        {/* C) Contact Info */}
-        <div className="view-grid" style={{ marginTop: 8 }}>
-          <div>
-            <div className="view-label">Email</div>
-            <div className="view-value">{vendor.email || "—"}</div>
-          </div>
-
-          <div>
-            <div className="view-label">Phone</div>
-            <div className="view-value">{vendor.phone || "—"}</div>
-          </div>
-
-          <div>
-            <div className="view-label">City</div>
-            <div className="view-value">{vendor.city || "—"}</div>
-          </div>
-        </div>
-
-        {/* D) Address + Country */}
-        <div className="view-grid two" style={{ marginTop: 8 }}>
-          <div>
-            <div className="view-label">Address</div>
-            <div className="view-value">
-              {vendor.address || "No address provided"}
-            </div>
-          </div>
-
-          <div>
-            <div className="view-label">Country</div>
-            <div className="view-value">{vendor.country || "—"}</div>
-          </div>
-        </div>
-
-        {/* E) Footer meta */}
-        <div className="view-footer">
-          <div>
-            <strong>Created:</strong> {createdAt || "—"}
-          </div>
-          <div>
-            <strong>Updated:</strong> {updatedAt || "—"}
-          </div>
+        <div>
+          <div className="view-label">Name</div>
+          <div className="view-value">{vendor.name}</div>
         </div>
       </div>
-    // </div>
+
+      {/* B) Company + Contact Person + Status */}
+      <div className="view-grid" style={{ marginTop: 8 }}>
+        <div>
+          <div className="view-label">Company Name</div>
+          <div className="view-value">{vendor.companyName || "—"}</div>
+        </div>
+
+        <div>
+          <div className="view-label">Contact Person</div>
+          <div className="view-value">{vendor.contactPerson || "—"}</div>
+        </div>
+
+        <div>
+          <div className="view-label">Status</div>
+          <div className="view-value">{vendor.status}</div>
+        </div>
+      </div>
+
+      {/* C) Contact Info */}
+      <div className="view-grid" style={{ marginTop: 8 }}>
+        <div>
+          <div className="view-label">Email</div>
+          <div className="view-value">{vendor.email || "—"}</div>
+        </div>
+
+        <div>
+          <div className="view-label">Phone</div>
+          <div className="view-value">{vendor.phone || "—"}</div>
+        </div>
+
+        <div>
+          <div className="view-label">City</div>
+          <div className="view-value">{vendor.city || "—"}</div>
+        </div>
+      </div>
+
+      {/* D) Address + Country */}
+      <div className="view-grid two" style={{ marginTop: 8 }}>
+        <div>
+          <div className="view-label">Address</div>
+          <div className="view-value">
+            {vendor.address || "No address provided"}
+          </div>
+        </div>
+
+        <div>
+          <div className="view-label">Country</div>
+          <div className="view-value">{vendor.country || "—"}</div>
+        </div>
+      </div>
+
+      {/* E) Footer meta */}
+      <div className="view-footer">
+        <div>
+          <strong>Created:</strong> {createdAt || "—"}
+        </div>
+        <div>
+          <strong>Updated:</strong> {updatedAt || "—"}
+        </div>
+      </div>
+    </div>
   );
 }

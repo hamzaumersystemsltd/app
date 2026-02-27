@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./ViewInventory.css";
 
@@ -25,8 +25,6 @@ const PLACEHOLDER_DATA_URL =
 
 export default function ViewInventory() {
   const { id } = useParams();
-  const navigate = useNavigate();
-
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
@@ -92,15 +90,6 @@ export default function ViewInventory() {
         >
           {errMsg}
         </div>
-
-        <div className="view-actions" style={{ marginTop: 16 }}>
-          <button
-            className="button-secondary"
-            onClick={() => navigate("/inventory/inventory-list")}
-          >
-            Back to List
-          </button>
-        </div>
       </div>
     );
   }
@@ -109,14 +98,6 @@ export default function ViewInventory() {
     return (
       <div className="viewinventory-card">
         <h3 className="viewinventory-title">Item not found</h3>
-        <div className="view-actions" style={{ marginTop: 16 }}>
-          <button
-            className="button-secondary"
-            onClick={() => navigate("/inventory/inventory-list")}
-          >
-            Back to List
-          </button>
-        </div>
       </div>
     );
   }
@@ -129,28 +110,9 @@ export default function ViewInventory() {
       <h3 className="viewinventory-title">Inventory Details</h3>
       <p className="viewinventory-subtitle">Here are the full item details</p>
 
-      {/* Actions */}
-      <div className="view-actions">
-        <button
-          className="button-secondary"
-          onClick={() => navigate("/inventory/inventory-list")}
-        >
-          Back
-        </button>
-
-        <button
-          className="button-view"
-          onClick={() => navigate(`/inventory/inventory-list/${item._id}/edit`)}
-        >
-          Edit Item
-        </button>
-      </div>
-
       {/* === TWO COLUMN LAYOUT START === */}
       <div className="viewinventory-layout">
-        {/* LEFT COLUMN (TEXT FIELDS) */}
         <div className="view-left">
-
           <div className="view-grid two">
             <div>
               <div className="view-label">Name</div>
@@ -244,7 +206,6 @@ export default function ViewInventory() {
           </div>
         </div>
       </div>
-      {/* === TWO COLUMN LAYOUT END === */}
     </div>
   );
 }

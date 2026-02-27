@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "./Purchaseinvoiceview.css";
@@ -73,15 +73,6 @@ export default function PurchaseInvoiceView() {
             Updated: {fmtDate(invoice.updatedAt)}
           </p>
         </div>
-
-        <div style={{ display: "flex", gap: 10 }}>
-          <Link to="/inventory/purchase-invoices" className="pi-btn outline">
-            Back to List
-          </Link>
-          <button className="pi-btn" onClick={() => window.print()}>
-            Print
-          </button>
-        </div>
       </div>
 
       {/* Items table */}
@@ -137,7 +128,6 @@ export default function PurchaseInvoiceView() {
               <strong>{money(invoice.grandTotal)}</strong>
             </span>
           </div>
-
         </div>
       </div>
     </div>

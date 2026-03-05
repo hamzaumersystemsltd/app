@@ -1,67 +1,17 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import React from "react";
 import "./Register.css";
 import { toast } from "react-toastify";
+import TextInput from "../../components/Form/TextInput.jsx";
+import PasswordInput from "../../components/Form/PasswordInput.jsx";
+import SelectInput from "../../components/Form/SelectInput.jsx";
+import FormRow from "../../components/Form/FormRow.jsx";
+import { FormActions } from "../../components/Form/FormActions.jsx";
+import { nameRegex, passwordStrongRegex } from "../../utils/validation.js";
 
-const nameRegex = /^[A-Za-z\s'-]+$/;
-const passwordStrongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
-
-// Password strength utility
-function evaluatePasswordStrength(pw) {
-  if (!pw) {
-    return { score: 0, label: "Very Weak", color: "#d9534f", width: "0%" };
-  }
-
-  let score = 0;
-
-  // Criteria
-  const lengthScore = pw.length >= 8 ? (pw.length >= 12 ? 2 : 1) : 0;
-  const hasLower = /[a-z]/.test(pw) ? 1 : 0;
-  const hasUpper = /[A-Z]/.test(pw) ? 1 : 0;
-  const hasNumber = /\d/.test(pw) ? 1 : 0;
-  const hasSpecial = /[^\w\s]/.test(pw) ? 1 : 0;
-
-  score = lengthScore + hasLower + hasUpper + hasNumber + hasSpecial; // 0–6
-
-  // Normalize to 0–5 scale for UI
-  if (score > 5) score = 5;
-
-  let label = "Very Weak";
-  let color = "#d9534f"; // red
-  let width = `${(score / 5) * 100}%`;
-
-  switch (true) {
-    case score <= 1:
-      label = "Very Weak";
-      color = "#d9534f"; // red
-      break;
-    case score === 2:
-      label = "Weak";
-      color = "#f0ad4e"; // orange
-      break;
-    case score === 3:
-      label = "Fair";
-      color = "#f0d54e"; // yellow-ish
-      break;
-    case score === 4:
-      label = "Good";
-      color = "#5cb85c"; // green
-      break;
-    case score === 5:
-      label = "Strong";
-      color = "#2e8b57"; // darker green
-      break;
-    default:
-      break;
-  }
-
-  return { score, label, color, width };
-}
-
-// Yup schema
 const RegisterSchema = Yup.object({
   firstName: Yup.string()
     .trim()
@@ -108,8 +58,6 @@ const RegisterSchema = Yup.object({
 
 export default function Register() {
   const navigate = useNavigate();
-  const [passwordValue, setPasswordValue] = React.useState("");
-  const strength = React.useMemo(() => evaluatePasswordStrength(passwordValue), [passwordValue]);
 
   return (
     <div className="register-page">
@@ -143,7 +91,6 @@ export default function Register() {
 
               await axios.post("http://localhost:5000/api/auth/register", payload);
 
-              // ✅ SUCCESS TOAST WITH REDIRECT
               toast.success(
                 ({ closeToast }) => (
                   <div>
@@ -172,9 +119,8 @@ export default function Register() {
               );
 
               resetForm();
-              setPasswordValue("");
             } catch (e) {
-              // ✅ ERROR TOAST
+              // ERROR TOAST
               toast.error(e.response?.data?.message || "Error registering.");
             } finally {
               setSubmitting(false);
@@ -183,122 +129,64 @@ export default function Register() {
         >
           {({ isSubmitting }) => (
             <Form>
-              {/* First Name */}
-              <div className="form-group">
-                <label className="label" htmlFor="firstName">First name</label>
-                <Field
-                  id="firstName"
+              {/* First & Last Name */}
+              <FormRow cols="two">
+                <TextInput
                   name="firstName"
-                  className="input"
+                  label="First name"
                   autoComplete="given-name"
                 />
-                <ErrorMessage name="firstName" component="div" className="message" />
-              </div>
-
-              {/* Last Name */}
-              <div className="form-group">
-                <label className="label" htmlFor="lastName">Last name</label>
-                <Field
-                  id="lastName"
+                <TextInput
                   name="lastName"
-                  className="input"
+                  label="Last name"
                   autoComplete="family-name"
                 />
-                <ErrorMessage name="lastName" component="div" className="message" />
-              </div>
+              </FormRow>
 
               {/* Email */}
-              <div className="form-group">
-                <label className="label" htmlFor="email">Email</label>
-                <Field
-                  id="email"
-                  name="email"
-                  type="email"
-                  className="input"
-                  autoComplete="email"
-                  inputMode="email"
+              <TextInput
+                name="email"
+                label="Email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+              />
+
+              {/* Gender & Age */}
+              <FormRow cols="two">
+                <SelectInput
+                  name="gender"
+                  label="Gender"
+                  options={[
+                    { value: "male", label: "Male" },
+                    { value: "female", label: "Female" },
+                  ]}
                 />
-                <ErrorMessage name="email" component="div" className="message" />
-              </div>
-
-              {/* Gender */}
-              <div className="form-group">
-                <label className="label" htmlFor="gender">Gender</label>
-                <Field as="select" id="gender" name="gender" className="input select">
-                  <option value="">Select gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </Field>
-                <ErrorMessage name="gender" component="div" className="message" />
-              </div>
-
-              {/* Age */}
-              <div className="form-group">
-                <label className="label" htmlFor="age">Age</label>
-                <Field
-                  id="age"
+                <TextInput
                   name="age"
+                  label="Age"
                   type="number"
-                  className="input"
                   min="13"
                   max="120"
                   inputMode="numeric"
                 />
-                <ErrorMessage name="age" component="div" className="message" />
-              </div>
+              </FormRow>
 
-              {/* Password */}
-              <div className="form-group">
-                <label className="label" htmlFor="password">Password (Must be 8+ chars and include uppercase, lowercase, number and special char.)</label>
+              {/* Passwords */}
+              <PasswordInput
+                name="password"
+                label="Password (Must be 8+ chars and include uppercase, lowercase, number and special char.)"
+                autoComplete="new-password"
+                showStrength
+              />
+              <PasswordInput
+                name="confirmPassword"
+                label="Confirm password"
+                autoComplete="new-password"
+              />
 
-                {/* Use Field render-props so we can intercept onChange and update strength */}
-                <Field name="password">
-                  {({ field }) => (
-                    <>
-                      <input
-                        id="password"
-                        type="password"
-                        className="input"
-                        autoComplete="new-password"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e); // keep Formik in sync
-                          setPasswordValue(e.target.value); // update local strength UI
-                        }}
-                      />
-
-                      {/* Strength meter */}
-                      <div className="pwd-strength">
-                        <div
-                          className="pwd-strength-bar"
-                          style={{ width: strength.width, backgroundColor: strength.color }}
-                        />
-                      </div>
-                      <div className="pwd-strength-label" style={{ color: strength.color }}>
-                        {strength.label}
-                      </div>
-                    </>
-                  )}
-                </Field>
-                <ErrorMessage name="password" component="div" className="message" />
-              </div>
-
-              {/* Confirm Password */}
-              <div className="form-group">
-                <label className="label" htmlFor="confirmPassword">Confirm password</label>
-                <Field
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  className="input"
-                  autoComplete="new-password"
-                />
-                <ErrorMessage name="confirmPassword" component="div" className="message" />
-              </div>
-
-              <button className="button" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Registering..." : "Register"}
-              </button>
+              {/* Submit */}
+              <FormActions isSubmitting={isSubmitting} label="Register" />
             </Form>
           )}
         </Formik>

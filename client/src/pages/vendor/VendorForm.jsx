@@ -1,9 +1,15 @@
 import React from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "./AddVendor.css";
+import TextInput from "../../components/Form/TextInput.jsx";
+import SelectInput from "../../components/Form/SelectInput.jsx";
+import FormRow from "../../components/Form/FormRow.jsx";
+import { FormActions } from "../../components/Form/FormActions.jsx";
+import FieldWrapper from "../../components/Form/FieldWrapper.jsx";
+import { phoneRegex } from "../../utils/validation.js";
 
 export const API_BASE = "http://localhost:5000";
 
@@ -22,8 +28,6 @@ export async function checkVendorIdAvailable(vendorId, token) {
     return true;
   }
 }
-
-const phoneRegex = /^[0-9+\-()\s]{7,20}$/;
 
 export const VendorSchema = Yup.object({
   vendorId: Yup.string()
@@ -50,6 +54,14 @@ export const VendorSchema = Yup.object({
   status: Yup.string().oneOf(["active", "inactive"], "Invalid status").default("active"),
 });
 
+function TextAreaInput({ name, label, rows = 3, ...props }) {
+  return (
+    <FieldWrapper name={name} label={label}>
+      <textarea id={name} className="input" rows={rows} name={name} {...props} />
+    </FieldWrapper>
+  );
+}
+
 export default function VendorForm({
   initialValues,
   onSubmit,
@@ -67,110 +79,68 @@ export default function VendorForm({
       onSubmit={onSubmit}
       enableReinitialize={enableReinitialize}
     >
-      {({ isSubmitting, setFieldError, handleBlur }) => (
+      {({ isSubmitting, setFieldValue, setFieldError }) => (
         <Form>
-          {/* 1) Name */}
-          <div className="form-group">
-            <label className="label" htmlFor="name">Name</label>
-            <Field id="name" name="name" className="input" />
-            <ErrorMessage name="name" component="div" className="message" />
-          </div>
+          {/* 1) Name, Vendor ID (unique), Company Name */}
+          <FormRow>
+            <TextInput id="name" name="name" label="Name" />
 
-          {/* 2) Vendor ID (unique), Company Name */}
-          <div className="form-row two">
-            <div className="form-group">
-              <label className="label" htmlFor="vendorId">Vendor ID</label>
+            <TextInput
+              id="vendorId"
+              name="vendorId"
+              label="Vendor ID"
+              inputMode="numeric"
+              maxLength={5}
+              onChange={(e) => {
+                const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
+                setFieldValue("vendorId", onlyDigits);
+              }}
+              onBlur={async (e) => {
+                const v = (e.target.value || "").trim();
+                if (!/^\d{5}$/.test(v)) return;
+                const available = await checkVendorIdAvailable(v, token);
+                if (!available) setFieldError("vendorId", "Vendor ID already exists");
+              }}
+            />
 
-              <Field name="vendorId">
-                {({ field, form }) => (
-                  <input
-                    id="vendorId"
-                    {...field}
-                    className="input"
-                    inputMode="numeric"
-                    pattern="[0-9]{5}"
-                    maxLength={5}
-                    onChange={(e) => {
-                      const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
-                      form.setFieldValue("vendorId", onlyDigits);
-                    }}
-                    onBlur={async (e) => {
-                      handleBlur(e);
-                      const v = (e.target.value || "").trim();
-                      if (!/^\d{5}$/.test(v)) return;
-                      const available = await checkVendorIdAvailable(v, token);
-                      if (!available) {
-                        setFieldError("vendorId", "Vendor ID already exists");
-                      }
-                    }}
-                  />
-                )}
-              </Field>
+            <TextInput
+              id="companyName"
+              name="companyName"
+              label="Company Name"
+            />
+          </FormRow>
 
-              <ErrorMessage name="vendorId" component="div" className="message" />
-            </div>
+          {/* 2) Contact Info */}
+          <FormRow>
+            <TextInput id="email" name="email" type="email" label="Email" />
+            <TextInput id="phone" name="phone" label="Phone" />
+            <TextInput
+              id="contactPerson"
+              name="contactPerson"
+              label="Contact Person"
+            />
+          </FormRow>
 
-            <div className="form-group">
-              <label className="label" htmlFor="companyName">Company Name</label>
-              <Field id="companyName" name="companyName" className="input" />
-              <ErrorMessage name="companyName" component="div" className="message" />
-            </div>
-          </div>
-
-          {/* 3) Contact Info */}
-          <div className="form-row">
-            <div className="form-group">
-              <label className="label" htmlFor="email">Email</label>
-              <Field id="email" name="email" type="email" className="input" />
-              <ErrorMessage name="email" component="div" className="message" />
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="phone">Phone</label>
-              <Field id="phone" name="phone" className="input" />
-              <ErrorMessage name="phone" component="div" className="message" />
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="contactPerson">Contact Person</label>
-              <Field id="contactPerson" name="contactPerson" className="input" />
-              <ErrorMessage name="contactPerson" component="div" className="message" />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="label" htmlFor="city">City</label>
-              <Field id="city" name="city" className="input" />
-              <ErrorMessage name="city" component="div" className="message" />
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="country">Country</label>
-              <Field id="country" name="country" className="input" />
-              <ErrorMessage name="country" component="div" className="message" />
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="status">Status</label>
-              <Field as="select" id="status" name="status" className="input">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </Field>
-              <ErrorMessage name="status" component="div" className="message" />
-            </div>
-          </div>
+          {/* 3) Location & Status */}
+          <FormRow>
+            <TextInput id="city" name="city" label="City" />
+            <TextInput id="country" name="country" label="Country" />
+            <SelectInput
+              id="status"
+              name="status"
+              label="Status"
+              options={[
+                { value: "active", label: "Active" },
+                { value: "inactive", label: "Inactive" },
+              ]}
+            />
+          </FormRow>
 
           {/* 4) Address */}
-          <div className="form-group">
-            <label className="label" htmlFor="address">Address</label>
-            <Field id="address" name="address" as="textarea" className="input" />
-            <ErrorMessage name="address" component="div" className="message" />
-          </div>
+          <TextAreaInput name="address" label="Address" rows={3} />
 
-          <button className="button" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : submitLabel}
-          </button>
+          {/* Submit */}
+          <FormActions isSubmitting={isSubmitting} label={submitLabel} />
         </Form>
       )}
     </Formik>

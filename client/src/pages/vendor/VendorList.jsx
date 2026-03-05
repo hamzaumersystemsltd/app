@@ -1,101 +1,70 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useMemo } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
-import "tippy.js/themes/material.css";
+import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import "./VendorList.css";
-import { FiRefreshCw, FiLoader, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
+import usePaginatedList from "../../hooks/usePaginatedList";
+import SearchInput from "../../components/listing/SearchInput";
+import PerPageSelector from "../../components/listing/PerPageSelector";
+import { Table, THead, TBody, TRow, TH, TCell } from "../../components/listing/Table";
+import LoadingRow from "../../components/listing/LoadingRow";
+import EmptyRow from "../../components/listing/EmptyRow";
+import ActionButton from "../../components/listing/ActionButton";
+import RefreshButton from "../../components/listing/RefreshButton";
+import PaginationBar from "../../components/listing/PaginationBar";
+import { confirmToast } from "../../components/listing/confirmToast";
 
 const API_BASE = "http://localhost:5000";
 
 export default function VendorList() {
-  const [vendors, setVendors] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [q, setQ] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const token = useMemo(
     () => (typeof window !== "undefined" ? localStorage.getItem("token") : null),
     []
   );
 
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      const res = await axios.get(`${API_BASE}/api/vendors`, {
-        params: { page, limit, q: q || undefined },
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (Array.isArray(res.data)) {
-        setVendors(res.data);
-        setTotal(res.data.length);
-      } else {
-        setVendors(res.data.items || []);
-        setTotal(res.data.total ?? (res.data.items?.length || 0));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to fetch vendors");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, limit, q, token]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const {
+    items: vendors,
+    total,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    filters,
+    setFilter,
+    loading,
+    totalPages,
+    reload,
+  } = usePaginatedList({
+    url: `${API_BASE}/api/vendors`,
+    initialPage: 1,
+    initialLimit: 10,
+    initialFilters: { q: "" },
+    token,
+  });
 
   const handleRefresh = async () => {
-    await load();
+    await reload();
     toast.success("Vendor list refreshed", { autoClose: 1000 });
   };
 
   const handleDelete = (id) => {
-    toast.info(
-      ({ closeToast }) => (
-        <div>
-          <strong>Are you sure you want to delete this vendor?</strong>
-
-          <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
-            <button
-              onClick={async () => {
-                closeToast();
-                try {
-                  await axios.delete(`${API_BASE}/api/vendors/${id}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                  });
-
-                  setVendors((prev) => prev.filter((v) => v._id !== id));
-                  setTotal((t) => Math.max(0, t - 1));
-
-                  toast.success("Vendor deleted", { autoClose: 1500 });
-                } catch (err) {
-                  console.error(err);
-                  toast.error(err.response?.data?.message || "Failed to delete vendor");
-                }
-              }}
-              className="btn danger"
-            >
-              Delete
-            </button>
-
-            <button onClick={closeToast} className="btn secondary">
-              Cancel
-            </button>
-          </div>
-        </div>
-      ),
-      { autoClose: false, closeOnClick: false }
-    );
+    confirmToast({
+      title: "Are you sure you want to delete this vendor?",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_BASE}/api/vendors/${id}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          await reload();
+          toast.success("Vendor deleted", { autoClose: 1500 });
+        } catch (err) {
+          console.error(err);
+          toast.error(err.response?.data?.message || "Failed to delete vendor");
+        }
+      },
+    });
   };
-
-  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
     <div className="vendorlist-card">
@@ -103,33 +72,22 @@ export default function VendorList() {
       <div className="vendorlist-header">
         <div>
           <h3 className="vendorlist-title">Vendor List</h3>
-          <p className="vendorlist-subtitle">
-            Search, filter and manage all vendors.
-          </p>
+          <p className="vendorlist-subtitle">Search, filter and manage all vendors.</p>
         </div>
 
         <div className="vendorlist-header-actions">
           <div className="vendorlist-search">
-            <input
-              className="input"
+            <SearchInput
+              value={filters.q || ""}
+              onChange={(v) => {
+                setFilter("q", v);
+                setPage(1);
+              }}
               placeholder="Search by vendor ID, name, company..."
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
             />
           </div>
 
-          {/* Refresh */}
-          <Tippy content="Refresh" theme="material" placement="bottom" delay={[150, 0]}>
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="icon-button"
-              aria-label="Refresh"
-              disabled={loading}
-            >
-              {loading ? <FiLoader size={18} className="spin" /> : <FiRefreshCw size={18} />}
-            </button>
-          </Tippy>
+          <RefreshButton loading={loading} onClick={handleRefresh} />
         </div>
       </div>
 
@@ -140,114 +98,76 @@ export default function VendorList() {
         </div>
 
         <div className="vendorlist-perpage">
-          <label>Per page</label>
-          <select
-            className="input"
-            style={{ width: 120 }}
+          <PerPageSelector
             value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
-              setPage(1);
-            }}
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+            onChange={(n) => { setLimit(n); setPage(1); }}
+          />
         </div>
       </div>
 
       {/* Table */}
-      <div className="table-wrap">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Vendor ID</th>
-              <th>Name</th>
-              <th>Company</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>City</th>
-              <th>Status</th>
-              <th style={{ width: 160 }}>Actions</th>
-            </tr>
-          </thead>
+      <Table>
+        <THead>
+          <TRow>
+            <TH>Vendor ID</TH>
+            <TH>Name</TH>
+            <TH>Company</TH>
+            <TH>Email</TH>
+            <TH>Phone</TH>
+            <TH>City</TH>
+            <TH>Status</TH>
+            <TH style={{ width: 160 }}>Actions</TH>
+          </TRow>
+        </THead>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="8" className="row-center">Loading...</td>
-              </tr>
-            ) : vendors.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="row-center">No vendors found.</td>
-              </tr>
-            ) : (
-              vendors.map((v) => (
-                <tr key={v._id}>
-                  <td className="pi-text-center">{v.vendorId}</td>
-                  <td className="pi-text-center">{v.name}</td>
-                  <td className="pi-text-center">{v.companyName || "-"}</td>
-                  <td className="pi-text-center">{v.email || "-"}</td>
-                  <td className="pi-text-center">{v.phone || "-"}</td>
-                  <td className="pi-text-center">{v.city || "-"}</td>
-                  <td className="pi-text-center">{v.status}</td>
-                  <td className="pi-text-center">
-                    <div className="actions icons">
-                      {/* View */}
-                      <Tippy content="View" theme="material">
-                        <Link to={`/vendor/vendor-list/${v._id}`} className="icon-button info">
-                          <FiEye size={18} />
-                        </Link>
-                      </Tippy>
+        <TBody>
+          {loading ? (
+            <LoadingRow colSpan={8} />
+          ) : vendors.length === 0 ? (
+            <EmptyRow colSpan={8} text="No vendors found." />
+          ) : (
+            vendors.map((v) => (
+              <TRow key={v._id}>
+                <TCell>{v.vendorId}</TCell>
+                <TCell>{v.name}</TCell>
+                <TCell>{v.companyName || "-"}</TCell>
+                <TCell>{v.email || "-"}</TCell>
+                <TCell>{v.phone || "-"}</TCell>
+                <TCell>{v.city || "-"}</TCell>
+                <TCell>{v.status}</TCell>
+                <TCell>
+                  <div className="actions icons">
+                    <ActionButton title="View" variant="info">
+                      <Link to={`/vendor/vendor-list/${v._id}`}>
+                        <FiEye size={18} />
+                      </Link>
+                    </ActionButton>
 
-                      {/* Edit */}
-                      <Tippy content="Edit" theme="material">
-                        <Link to={`/vendor/vendor-list/${v._id}/edit`} className="icon-button warn">
-                          <FiEdit2 size={18} />
-                        </Link>
-                      </Tippy>
+                    <ActionButton title="Edit" variant="warn">
+                      <Link to={`/vendor/vendor-list/${v._id}/edit`}>
+                        <FiEdit2 size={18} />
+                      </Link>
+                    </ActionButton>
 
-                      {/* Delete */}
-                      <Tippy content="Delete" theme="material">
-                        <button
-                          className="icon-button danger"
-                          onClick={() => handleDelete(v._id)}
-                        >
-                          <FiTrash2 size={18} />
-                        </button>
-                      </Tippy>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                    <ActionButton title="Delete" variant="danger" onClick={() => handleDelete(v._id)}>
+                      <FiTrash2 size={18} />
+                    </ActionButton>
+                  </div>
+                </TCell>
+              </TRow>
+            ))
+          )}
+        </TBody>
+      </Table>
 
       {/* Pagination */}
-      <div className="pagination-bar">
-        <button
-          className="button outline"
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page <= 1 || loading}
-        >
-          ‹ Prev
-        </button>
-
-        <div className="pagination-info">
-          Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-        </div>
-
-        <button
-          className="button outline"
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page >= totalPages || loading}
-        >
-          Next ›
-        </button>
-      </div>
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        loading={loading}
+        onPrev={() => setPage((p) => Math.max(1, p - 1))}
+        onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+      />
     </div>
   );
 }

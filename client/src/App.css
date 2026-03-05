@@ -1,8 +1,8 @@
 
 /* ===== App background ===== */
 .app-page {
-  min-height: calc(100vh - 56px); /* accounts for nav height */
-  background: #f5f7fb;           /* same as home/login */
+  min-height: calc(100vh - 56px);
+  background: #f5f7fb;
   padding: 24px 16px;
 }
 

@@ -1,9 +1,21 @@
 import { Link, useLocation } from "react-router-dom";
 import "./breadcrumbs.css";
 
+const HIDE_EXACT = ["/"];
+const HIDE_PREFIX = ["/login", "/register"];
 const Breadcrumbs = () => {
   const location = useLocation();
-  const pathnames = location.pathname.split("/").filter((x) => x);
+  const pathname = location.pathname;
+
+  if (HIDE_EXACT.includes(pathname)) {
+    return null;
+  }
+
+  if (HIDE_PREFIX.some((p) => pathname.startsWith(p))) {
+    return null;
+  }
+
+  const pathnames = pathname.split("/").filter((x) => x);
 
   return (
     <nav className="bc-container" aria-label="Breadcrumb">

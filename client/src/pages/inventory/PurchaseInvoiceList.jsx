@@ -1,121 +1,75 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useMemo } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
-import "tippy.js/themes/material.css";
-import { FiRefreshCw, FiLoader, FiEye, FiCalendar, FiSearch, FiTrash2 } from "react-icons/fi";
+import { FiEye, FiTrash2 } from "react-icons/fi";
 import "./PurchaseInvoiceList.css";
+import usePaginatedList from "../../hooks/usePaginatedList";
+import SearchInput from "../../components/listing/SearchInput";
+import DateRangePicker from "../../components/listing/DateRangePicker";
+import PerPageSelector from "../../components/listing/PerPageSelector";
+import { Table, THead, TBody, TRow, TH, TCell } from "../../components/listing/Table";
+import LoadingRow from "../../components/listing/LoadingRow";
+import EmptyRow from "../../components/listing/EmptyRow";
+import ActionButton from "../../components/listing/ActionButton";
+import RefreshButton from "../../components/listing/RefreshButton";
+import PaginationBar from "../../components/listing/PaginationBar";
+import { confirmToast } from "../../components/listing/confirmToast";
+import { formatMoney, formatDate } from "../../utils/format";
 
 const API_BASE = "http://localhost:5000";
 const CURRENCY = "PKR";
 
-/* ===== Helpers ===== */
-function formatMoney(n) {
-  const v = Number(n || 0);
-  return `${v.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${CURRENCY}`;
-}
-function formatDate(iso) {
-  if (!iso) return "-";
-  const d = new Date(iso);
-  if (isNaN(d)) return iso;
-  return d.toLocaleString(); // or toLocaleDateString()
-}
-
-/* ===== Component ===== */
 export default function PurchaseInvoiceList() {
-  const [invoices, setInvoices] = useState([]);
-  const [total, setTotal] = useState(0);
-
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-
-  const [search, setSearch] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-
-  const [loading, setLoading] = useState(false);
-
   const token = useMemo(
     () => (typeof window !== "undefined" ? localStorage.getItem("token") : null),
     []
   );
 
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_BASE}/api/purchases/invoices`, {
-        params: {
-          page,
-          limit,
-          search: search || undefined,
-          dateFrom: dateFrom || undefined,
-          dateTo: dateTo || undefined,
-        },
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      const data = res.data || {};
-      setInvoices(Array.isArray(data.items) ? data.items : []);
-      setTotal(Number.isFinite(data.total) ? data.total : (data.items?.length || 0));
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to fetch invoices");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, limit, search, dateFrom, dateTo, token]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const {
+    items: invoices,
+    total,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    filters,
+    setFilter,
+    loading,
+    totalPages,
+    reload,
+  } = usePaginatedList({
+    url: `${API_BASE}/api/purchases/invoices`,
+    initialPage: 1,
+    initialLimit: 10,
+    initialFilters: { search: "", dateFrom: "", dateTo: "" },
+    token,
+  });
 
   const handleRefresh = async () => {
-    await load();
+    await reload();
     toast.success("Invoices refreshed", { autoClose: 900 });
   };
 
-  // Confirm + Delete
   const handleDelete = (invId, display = "") => {
-    toast.info(
-      ({ closeToast }) => (
-        <div>
-          <strong>Delete invoice {display ? `#${display}` : ""}?</strong>
-          <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-            <button
-              className="btn danger"
-              onClick={async () => {
-                try {
-                  await axios.delete(`${API_BASE}/api/purchases/invoices/${invId}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                  });
-                  // Optimistic update
-                  setInvoices((prev) => prev.filter((x) => x._id !== invId));
-                  setTotal((t) => Math.max(0, t - 1));
-                  closeToast();
-                  toast.success("Invoice deleted", { autoClose: 1200 });
-                } catch (err) {
-                  console.error(err);
-                  toast.error(err.response?.data?.message || "Failed to delete invoice");
-                }
-              }}
-            >
-              Delete
-            </button>
-            <button className="btn secondary" onClick={closeToast}>
-              Cancel
-            </button>
-          </div>
-        </div>
-      ),
-      { autoClose: false, closeOnClick: false }
-    );
+    confirmToast({
+      title: `Delete invoice ${display ? `#${display}` : ""}?`,
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_BASE}/api/purchases/invoices/${invId}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          await reload();
+          toast.success("Invoice deleted", { autoClose: 1200 });
+        } catch (err) {
+          console.error(err);
+          toast.error(err.response?.data?.message || "Failed to delete invoice");
+        }
+      },
+    });
   };
 
-  // Derived summaries for display
   const vendorsSummary = (inv) => {
     const set = new Set((inv.items || []).map((it) => it.vendorName || "-"));
     const names = [...set].filter(Boolean);
@@ -134,72 +88,25 @@ export default function PurchaseInvoiceList() {
         </div>
 
         <div className="invoice-header-actions">
-          {/* Search + Dates */}
           <div className="invoice-search">
-            {/* Search */}
-            <div className="input-with-icon" style={{ minWidth: 260 }}>
-              <FiSearch
-                size={16}
-                style={{ position: "absolute", left: 10, top: 12, opacity: 0.7 }}
-              />
-              <input
-                className="input"
-                placeholder="Search by invoice no, item or vendor..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
+            <SearchInput
+              value={filters.search || ""}
+              onChange={(v) => {
+                setFilter("search", v);
+                setPage(1);
+              }}
+              placeholder="Search by invoice no, item or vendor..."
+            />
 
-            {/* Date from */}
-            <div className="input-with-icon" style={{ minWidth: 180 }}>
-              <FiCalendar
-                size={16}
-                style={{ position: "absolute", left: 10, top: 12, opacity: 0.7 }}
-              />
-              <input
-                type="date"
-                className="input"
-                value={dateFrom}
-                onChange={(e) => {
-                  setDateFrom(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
-
-            {/* Date to */}
-            <div className="input-with-icon" style={{ minWidth: 180 }}>
-              <FiCalendar
-                size={16}
-                style={{ position: "absolute", left: 10, top: 12, opacity: 0.7 }}
-              />
-              <input
-                type="date"
-                className="input"
-                value={dateTo}
-                onChange={(e) => {
-                  setDateTo(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
+            <DateRangePicker
+              from={filters.dateFrom}
+              to={filters.dateTo}
+              onFromChange={(v) => { setFilter("dateFrom", v); setPage(1); }}
+              onToChange={(v) => { setFilter("dateTo", v); setPage(1); }}
+            />
           </div>
 
-          {/* Refresh */}
-          <Tippy content="Refresh" theme="material" delay={[150, 0]} placement="bottom">
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="icon-button"
-              aria-label="Refresh"
-              disabled={loading}
-            >
-              {loading ? <FiLoader size={18} className="spin" /> : <FiRefreshCw size={18} />}
-            </button>
-          </Tippy>
+          <RefreshButton loading={loading} onClick={handleRefresh} />
         </div>
       </div>
 
@@ -210,121 +117,76 @@ export default function PurchaseInvoiceList() {
         </div>
 
         <div className="invoice-perpage">
-          <label>Per page</label>
-          <select
-            className="input"
-            style={{ width: 120 }}
+          <PerPageSelector
             value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
-              setPage(1);
-            }}
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+            onChange={(n) => { setLimit(n); setPage(1); }}
+          />
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="table-wrap">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Invoice No</th>
-              <th>Date</th>
-              <th>Subtotal</th>
-              <th>Discount</th>
-              <th>Grand Total</th>
-              <th>Vendors</th>
-              <th>Items</th>
-              <th style={{ width: 120 }}>Actions</th>
-            </tr>
-          </thead>
+      {/* Table */}
+      <Table>
+        <THead>
+          <TRow>
+            <TH>#</TH>
+            <TH>Invoice No</TH>
+            <TH>Date</TH>
+            <TH>Subtotal</TH>
+            <TH>Discount</TH>
+            <TH>Grand Total</TH>
+            <TH>Vendors</TH>
+            <TH>Items</TH>
+            <TH style={{ width: 120 }}>Actions</TH>
+          </TRow>
+        </THead>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="9" className="row-center">
-                  Loading...
-                </td>
-              </tr>
-            ) : invoices.length === 0 ? (
-              <tr>
-                <td colSpan="9" className="row-center">
-                  No invoices found.
-                </td>
-              </tr>
-            ) : (
-              invoices.map((inv, idx) => (
-                <tr key={inv._id}>
-                  <td className="pi-text-center">{(page - 1) * limit + (idx + 1)}</td>
-                  <td className="pi-text-center">
-                    <strong>#{inv.invoiceNo ?? "-"}</strong>
-                  </td>
-                  <td className="pi-text-center">{formatDate(inv.createdAt)}</td>
-                  <td className="pi-text-center">{formatMoney(inv.subTotal)}</td>
-                  <td className="pi-text-center">{formatMoney(inv.discount)}</td>
-                  <td className="pi-text-center">
-                    <strong>{formatMoney(inv.grandTotal)}</strong>
-                  </td>
-                  <td className="pi-text-center">{vendorsSummary(inv)}</td>
-                  <td className="pi-text-center">{itemsCount(inv)}</td>
-                  <td className="pi-text-center">
-                    <div className="actions">
-                      <Tippy content="View" theme="material">
-                        <Link
-                          to={`/inventory/purchase-invoices/${inv._id}`}
-                          className="icon-button info"
-                          aria-label="View"
-                        >
-                          <FiEye size={18} />
-                        </Link>
-                      </Tippy>
+        <TBody>
+          {loading ? (
+            <LoadingRow colSpan={9} />
+          ) : invoices.length === 0 ? (
+            <EmptyRow colSpan={9} text="No invoices found." />
+          ) : (
+            invoices.map((inv, idx) => (
+              <TRow key={inv._id}>
+                <TCell>{(page - 1) * limit + (idx + 1)}</TCell>
+                <TCell><strong>#{inv.invoiceNo ?? "-"}</strong></TCell>
+                <TCell>{formatDate(inv.createdAt)}</TCell>
+                <TCell>{formatMoney(inv.subTotal, CURRENCY)}</TCell>
+                <TCell>{formatMoney(inv.discount, CURRENCY)}</TCell>
+                <TCell><strong>{formatMoney(inv.grandTotal, CURRENCY)}</strong></TCell>
+                <TCell>{vendorsSummary(inv)}</TCell>
+                <TCell>{itemsCount(inv)}</TCell>
+                <TCell>
+                  <div className="actions">
+                    <ActionButton title="View" variant="info">
+                      <Link to={`/inventory/purchase-invoices/${inv._id}`} aria-label="View">
+                        <FiEye size={18} />
+                      </Link>
+                    </ActionButton>
 
-                      <Tippy content="Delete" theme="material">
-                        <button
-                          type="button"
-                          className="icon-button danger"
-                          aria-label="Delete"
-                          onClick={() => handleDelete(inv._id, inv.invoiceNo)}
-                        >
-                          <FiTrash2 size={18} />
-                        </button>
-                      </Tippy>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+                    <ActionButton
+                      title="Delete"
+                      variant="danger"
+                      onClick={() => handleDelete(inv._id, inv.invoiceNo)}
+                    >
+                      <FiTrash2 size={18} />
+                    </ActionButton>
+                  </div>
+                </TCell>
+              </TRow>
+            ))
+          )}
+        </TBody>
+      </Table>
 
       {/* Pagination */}
-      <div className="pagination-bar">
-        <button
-          className="button outline"
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page <= 1 || loading}
-        >
-          ‹ Prev
-        </button>
-
-        <div className="pagination-info">
-          Page <strong>{page}</strong> of <strong>{Math.max(1, totalPages)}</strong>
-        </div>
-
-        <button
-          className="button outline"
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page >= totalPages || loading}
-        >
-          Next ›
-        </button>
-      </div>
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        loading={loading}
+        onPrev={() => setPage((p) => Math.max(1, p - 1))}
+        onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+      />
     </div>
   );
 }

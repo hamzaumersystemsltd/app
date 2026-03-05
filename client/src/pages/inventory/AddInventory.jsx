@@ -21,7 +21,7 @@ export default function AddInventory({ authToken }) {
     costPrice: "",
     stockQuantity: "",
     description: "",
-    imageFile: null, // <-- important for Formik
+    imageFile: null,
   };
 
   const handleAdd = async (

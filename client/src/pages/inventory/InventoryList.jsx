@@ -1,114 +1,72 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useMemo } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
-import "tippy.js/themes/material.css";
+import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 import "./InventoryList.css";
-import { FiRefreshCw, FiLoader, FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
+import usePaginatedList from "../../hooks/usePaginatedList";
+import SearchInput from "../../components/listing/SearchInput";
+import PerPageSelector from "../../components/listing/PerPageSelector";
+import { Table, THead, TBody, TRow, TH, TCell } from "../../components/listing/Table";
+import LoadingRow from "../../components/listing/LoadingRow";
+import EmptyRow from "../../components/listing/EmptyRow";
+import ActionButton from "../../components/listing/ActionButton";
+import RefreshButton from "../../components/listing/RefreshButton";
+import PaginationBar from "../../components/listing/PaginationBar";
+import { confirmToast } from "../../components/listing/confirmToast";
+import ThumbnailImage from "../../components/listing/ThumbnailImage";
 
 const API_BASE = "http://localhost:5000";
 const currency = "PKR";
 
-// Very small inline placeholder (1x1 gray pixel) used when item.image is missing
-const PLACEHOLDER_DATA_URL =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'>
-      <rect width='100%' height='100%' fill='#f0f0f0'/>
-      <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='#bbb' font-size='10' font-family='sans-serif'>No Image</text>
-    </svg>`
-  );
-
 export default function InventoryList() {
-  const [items, setItems] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [q, setQ] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const token = useMemo(
     () => (typeof window !== "undefined" ? localStorage.getItem("token") : null),
     []
   );
 
-  // Fetch inventory items
-  const load = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_BASE}/api/inventory`, {
-        params: { page, limit, q: q || undefined },
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-
-      if (Array.isArray(res.data)) {
-        setItems(res.data);
-        setTotal(res.data.length);
-      } else {
-        setItems(res.data.items || []);
-        setTotal(res.data.total ?? (res.data.items?.length || 0));
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to fetch inventory");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, limit, q, token]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const {
+    items,
+    total,
+    page,
+    setPage,
+    limit,
+    setLimit,
+    filters,
+    setFilter,
+    loading,
+    totalPages,
+    reload,
+  } = usePaginatedList({
+    url: `${API_BASE}/api/inventory`,
+    initialPage: 1,
+    initialLimit: 10,
+    initialFilters: { q: "" },
+    token,
+  });
 
   const handleRefresh = async () => {
-    await load();
+    await reload();
     toast.success("Inventory refreshed", { autoClose: 1000 });
   };
 
   const handleDelete = (id) => {
-    toast.info(
-      ({ closeToast }) => (
-        <div>
-          <strong>Are you sure you want to delete this item?</strong>
-          <div style={{ marginTop: "8px", display: "flex", gap: "8px" }}>
-            <button
-              onClick={async () => {
-                closeToast();
-
-                try {
-                  await axios.delete(`${API_BASE}/api/inventory/${id}`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
-                  });
-
-                  setItems((prev) => prev.filter((it) => it._id !== id));
-                  setTotal((t) => Math.max(0, t - 1));
-
-                  toast.success("Item deleted", { autoClose: 1200 });
-                } catch (err) {
-                  console.error(err);
-                  toast.error(
-                    err.response?.data?.message || "Failed to delete item"
-                  );
-                }
-              }}
-              className="btn danger"
-            >
-              Delete
-            </button>
-
-            <button onClick={closeToast} className="btn secondary">
-              Cancel
-            </button>
-          </div>
-        </div>
-      ),
-      { autoClose: false, closeOnClick: false }
-    );
+    confirmToast({
+      title: "Are you sure you want to delete this item?",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_BASE}/api/inventory/${id}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          await reload();
+          toast.success("Item deleted", { autoClose: 1200 });
+        } catch (err) {
+          console.error(err);
+          toast.error(err.response?.data?.message || "Failed to delete item");
+        }
+      },
+    });
   };
-
-  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
     <div className="inventorylist-card">
@@ -116,41 +74,22 @@ export default function InventoryList() {
       <div className="inventorylist-header">
         <div>
           <h3 className="inventorylist-title">Inventory List</h3>
-          <p className="inventorylist-subtitle">
-            Search, sort, and manage your items
-          </p>
+          <p className="inventorylist-subtitle">Search, sort, and manage your items</p>
         </div>
 
         <div className="inventorylist-header-actions">
           <div className="inventorylist-search">
-            <input
-              className="input"
-              placeholder="Search by name, code, category..."
-              value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
+            <SearchInput
+              value={filters.q || ""}
+              onChange={(v) => {
+                setFilter("q", v);
                 setPage(1);
               }}
+              placeholder="Search by name, code, category..."
             />
           </div>
 
-          {/* Refresh icon */}
-          <Tippy
-            content="Refresh"
-            theme="material"
-            delay={[150, 0]}
-            placement="bottom"
-          >
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="icon-button"
-              aria-label="Refresh"
-              disabled={loading}
-            >
-              {loading ? <FiLoader size={18} className="spin" /> : <FiRefreshCw size={18} />}
-            </button>
-          </Tippy>
+          <RefreshButton loading={loading} onClick={handleRefresh} />
         </div>
       </div>
 
@@ -161,143 +100,82 @@ export default function InventoryList() {
         </div>
 
         <div className="inventorylist-perpage">
-          <label>Per page</label>
-          <select
-            className="input"
-            style={{ width: 120 }}
+          <PerPageSelector
             value={limit}
-            onChange={(e) => {
-              setLimit(Number(e.target.value));
-              setPage(1);
-            }}
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+            onChange={(n) => { setLimit(n); setPage(1); }}
+          />
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="table-wrap">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Item ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Wholesale</th>
-              <th>Retail</th>
-              <th>Cost</th>
-              <th>Quantity</th>
-              <th style={{ width: 160 }}>Actions</th>
-            </tr>
-          </thead>
+      {/* Table */}
+      <Table>
+        <THead>
+          <TRow>
+            <TH>Image</TH>
+            <TH>Item ID</TH>
+            <TH>Name</TH>
+            <TH>Category</TH>
+            <TH>Wholesale</TH>
+            <TH>Retail</TH>
+            <TH>Cost</TH>
+            <TH>Quantity</TH>
+            <TH style={{ width: 160 }}>Actions</TH>
+          </TRow>
+        </THead>
 
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="9" className="row-center">
-                  Loading...
-                </td>
-              </tr>
-            ) : items.length === 0 ? (
-              <tr>
-                <td colSpan="9" className="row-center">
-                  No inventory found.
-                </td>
-              </tr>
-            ) : (
-              items.map((item) => {
-                const imgSrc = item?.image || PLACEHOLDER_DATA_URL;
-                const imgAlt = item?.name ? `${item.name} image` : "item image";
+        <TBody>
+          {loading ? (
+            <LoadingRow colSpan={9} />
+          ) : items.length === 0 ? (
+            <EmptyRow colSpan={9} text="No inventory found." />
+          ) : (
+            items.map((item) => (
+              <TRow key={item._id}>
+                <TCell align="center">
+                  <ThumbnailImage src={item?.image} alt={item?.name ? `${item.name} image` : "item image"} />
+                </TCell>
 
-                return (
-                  <tr key={item._id}>
-                    <td>
-                      <div className="thumb-cell">
-                        <img
-                          src={imgSrc}
-                          alt={imgAlt}
-                          className="thumb"
-                          loading="lazy"
-                          onError={(e) => {
-                            // fallback if broken URL
-                            e.currentTarget.src = PLACEHOLDER_DATA_URL;
-                          }}
-                        />
-                      </div>
-                    </td>
+                <TCell>{item.itemCode}</TCell>
+                <TCell>{item.name}</TCell>
+                <TCell>{item.category}</TCell>
+                <TCell>{item.wsPrice} {currency}</TCell>
+                <TCell>{item.rtPrice} {currency}</TCell>
+                <TCell>{item.costPrice} {currency}</TCell>
+                <TCell>{item.stockQuantity}</TCell>
 
-                    <td className="pi-text-center">{item.itemCode}</td>
-                    <td className="pi-text-center">{item.name}</td>
-                    <td className="pi-text-center">{item.category}</td>
-                    <td className="pi-text-center">{item.wsPrice} {currency}</td>
-                    <td className="pi-text-center">{item.rtPrice} {currency}</td>
-                    <td className="pi-text-center">{item.costPrice} {currency}</td>
-                    <td className="pi-text-center">{item.stockQuantity}</td>
+                <TCell>
+                  <div className="actions icons">
+                    <ActionButton title="View" variant="info">
+                      <Link to={`/inventory/inventory-list/${item._id}`}>
+                        <FiEye size={18} />
+                      </Link>
+                    </ActionButton>
 
-                    <td className="pi-text-center">
-                      <div className="actions icons">
-                        <Tippy content="View" theme="material">
-                          <Link
-                            to={`/inventory/inventory-list/${item._id}`}
-                            className="icon-button info"
-                          >
-                            <FiEye size={18} />
-                          </Link>
-                        </Tippy>
+                    <ActionButton title="Edit" variant="warn">
+                      <Link to={`/inventory/inventory-list/${item._id}/edit`}>
+                        <FiEdit2 size={18} />
+                      </Link>
+                    </ActionButton>
 
-                        <Tippy content="Edit" theme="material">
-                          <Link
-                            to={`/inventory/inventory-list/${item._id}/edit`}
-                            className="icon-button warn"
-                          >
-                            <FiEdit2 size={18} />
-                          </Link>
-                        </Tippy>
-
-                        <Tippy content="Delete" theme="material">
-                          <button
-                            className="icon-button danger"
-                            onClick={() => handleDelete(item._id)}
-                          >
-                            <FiTrash2 size={18} />
-                          </button>
-                        </Tippy>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                    <ActionButton title="Delete" variant="danger" onClick={() => handleDelete(item._id)}>
+                      <FiTrash2 size={18} />
+                    </ActionButton>
+                  </div>
+                </TCell>
+              </TRow>
+            ))
+          )}
+        </TBody>
+      </Table>
 
       {/* Pagination */}
-      <div className="pagination-bar">
-        <button
-          className="button outline"
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page <= 1 || loading}
-        >
-          ‹ Prev
-        </button>
-
-        <div className="pagination-info">
-          Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-        </div>
-
-        <button
-          className="button outline"
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page >= totalPages || loading}
-        >
-          Next ›
-        </button>
-      </div>
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        loading={loading}
+        onPrev={() => setPage((p) => Math.max(1, p - 1))}
+        onNext={() => setPage((p) => Math.min(totalPages, p + 1))}
+      />
     </div>
   );
 }

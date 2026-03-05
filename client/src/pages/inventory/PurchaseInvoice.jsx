@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/material.css";
-import { FiTrash2, FiEdit2, FiPlus } from "react-icons/fi";
+import { FiTrash2, FiEdit2 } from "react-icons/fi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Purchaseinvoice.css";
@@ -16,6 +16,7 @@ const emptyRow = (id) => ({
   quantity: 0,
   lineTotal: 0,
   locked: false,
+  editing: false,
   vendorId: "",
   codeError: false,
   qtyError: false,
@@ -75,7 +76,6 @@ export default function PurchaseInvoice() {
   const focusItemCode = (rowId) => focusRef(`itemCode-${rowId}`);
   const focusQty = (rowId) => focusRef(`qty-${rowId}`);
   const focusVendor = (rowId) => focusRef(`vendor-${rowId}`);
-  const focusAddBtn = (rowId) => focusRef(`btn-add-${rowId}`);
 
   const insertEmptyRowAfter = (afterRowId) => {
     const id = nextRowId.current++;
@@ -98,19 +98,34 @@ export default function PurchaseInvoice() {
   };
 
   const editRow = (id) => {
-    updateRow(id, {
-      locked: false,
-      name: "",
-      costPrice: 0,
-      quantity: 0,
-      lineTotal: 0,
-      itemCode: "",
-      vendorId: "",
-      codeError: false,
-      qtyError: false,
-      vendorError: false,
-    });
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              editing: true,
+              codeError: false,
+              qtyError: false,
+              vendorError: false,
+            }
+          : r
+      )
+    );
     setTimeout(() => focusItemCode(id), 20);
+  };
+
+  const stopEditingRow = (id) => {
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              editing: false,
+              locked: r.locked || Boolean(r.name || r.costPrice),
+            }
+          : r
+      )
+    );
   };
 
   const tryMergeDuplicate = (itemCode, id) => {
@@ -167,6 +182,7 @@ export default function PurchaseInvoice() {
         costPrice: Number(item.costPrice) || 0,
         quantity: 0,
         locked: true,
+        editing: false,
         codeError: false,
         qtyError: true,
         vendorError: true,
@@ -187,6 +203,7 @@ export default function PurchaseInvoice() {
     if (e.key === "Enter") {
       e.preventDefault();
       const code = (row.itemCode || "").trim();
+
       if (!/^\d{5}$/.test(code)) {
         toast.error("Item code must be exactly 5 digits (e.g., 00001).", {
           autoClose: 1600,
@@ -194,11 +211,15 @@ export default function PurchaseInvoice() {
         updateRow(row.id, { codeError: true });
         return;
       }
+
       const ok = await fetchAndFillRow(row);
+
       if (ok) {
+        updateRow(row.id, { locked: true, editing: false });
         setTimeout(() => focusQty(row.id), 30);
       }
     }
+
     if (e.key === "Escape") {
       updateRow(row.id, emptyRow(row.id));
       focusItemCode(row.id);
@@ -230,19 +251,20 @@ export default function PurchaseInvoice() {
   const handleVendorKeyDown = (e, row) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      setTimeout(() => focusAddBtn(row.id), 20);
-    }
-  };
 
-  const handleAddBelow = (rowId) => {
-    updateRow(rowId, { locked: true });
-    insertEmptyRowAfter(rowId);
-  };
+      if (row.editing) {
+        stopEditingRow(row.id);
+      }
 
-  const handleAddBtnKeyDown = (e, rowId) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddBelow(rowId);
+      const all = [...rows];
+      const index = all.findIndex((r) => r.id === row.id);
+      const nextRow = all[index + 1];
+
+      if (nextRow) {
+        setTimeout(() => focusItemCode(nextRow.id), 30);
+      } else {
+        insertEmptyRowAfter(row.id);
+      }
     }
   };
 
@@ -276,114 +298,6 @@ export default function PurchaseInvoice() {
     loadVendors();
   }, [token]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const codeErr = rows.find((r) => r.codeError);
-    if (codeErr) {
-      toast.error("Fix invalid item code before saving.", { autoClose: 1500 });
-      setTimeout(() => focusItemCode(codeErr.id), 20);
-      return;
-    }
-    const qtyErr = rows.find((r) => r.locked && Number(r.quantity) <= 0);
-    if (qtyErr) {
-      toast.error("Quantity must be greater than 0.", { autoClose: 1500 });
-      setTimeout(() => focusQty(qtyErr.id), 20);
-      return;
-    }
-    const vendorErr = rows.find(
-      (r) => r.locked && Number(r.quantity) > 0 && !r.vendorId
-    );
-    if (vendorErr) {
-      toast.error("Please select a vendor for each item.", { autoClose: 1500 });
-      updateRow(vendorErr.id, { vendorError: true });
-      setTimeout(() => focusVendor(vendorErr.id), 20);
-      return;
-    }
-
-    const items = computedRows
-      .filter((r) => r.locked && r.itemCode && r.quantity > 0)
-      .map((r) => ({
-        itemCode: r.itemCode.trim(),
-        name: r.name,
-        costPrice: Number(r.costPrice),
-        quantity: Number(r.quantity),
-        lineTotal: Number(r.lineTotal),
-        vendorId: r.vendorId || null,
-      }));
-
-    if (items.length === 0) {
-      toast.error("Please add at least one item with quantity > 0.", {
-        autoClose: 1600,
-      });
-      return;
-    }
-
-    const payload = {
-      items,
-      subTotal,
-      discount: cleanedDiscount,
-      grandTotal,
-    };
-
-    try {
-      const url = `${API_BASE}/api/purchases/invoices`;
-
-      await axios.post(url, payload, {
-        headers: {
-          "Content-Type": "application/json",
-          ...authHeaders,
-        },
-      });
-
-      toast.success("Purchase invoice saved successfully!", {
-        autoClose: 1400,
-      });
-
-      setRows([emptyRow(1)]);
-      nextRowId.current = 2;
-      setDiscount(0);
-      setTimeout(() => focusItemCode(1), 30);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Error saving invoice.", {
-        autoClose: 1800,
-      });
-    }
-  };
-
-  const handleFormKeyDown = (e) => {
-    if (e.key !== "Enter") return;
-    const allow = e.target?.getAttribute?.("data-allow-enter");
-    if (allow !== "itemcode") e.preventDefault();
-  };
-
-  useEffect(() => {
-    const onKeyDown = (e) => {
-      const key = e.key?.toLowerCase();
-      const isSaveCombo =
-        (e.ctrlKey && key === "s") ||
-        (e.metaKey && key === "s") ||
-        (e.altKey && key === "s");
-
-      if (isSaveCombo) {
-        e.preventDefault();
-        if (
-          formRef.current &&
-          typeof formRef.current.requestSubmit === "function"
-        ) {
-          formRef.current.requestSubmit();
-        } else if (formRef.current) {
-          formRef.current.dispatchEvent(
-            new Event("submit", { cancelable: true, bubbles: true })
-          );
-        }
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
   useEffect(() => {
     focusItemCode(1);
   }, []);
@@ -397,11 +311,7 @@ export default function PurchaseInvoice() {
         </p>
       </div>
 
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit}
-        onKeyDown={handleFormKeyDown}
-      >
+      <form ref={formRef}>
         <div className="pi-table-wrap">
           <table className="pi-table">
             <thead>
@@ -422,18 +332,18 @@ export default function PurchaseInvoice() {
                 <tr key={row.id}>
                   <td className="pi-text-center">{idx + 1}</td>
 
+                  {/* ITEM CODE */}
                   <td>
                     <input
-                      ref={(el) => (inputRefs.current[`itemCode-${row.id}`] = el)}
+                      ref={(el) =>
+                        (inputRefs.current[`itemCode-${row.id}`] = el)
+                      }
                       className={`pi-input ${row.codeError ? "error" : ""}`}
                       type="text"
-                      data-allow-enter="itemcode"
-                      placeholder="Item code (00001)"
                       inputMode="numeric"
-                      pattern="[0-9]{5}"
                       maxLength={5}
                       value={row.itemCode}
-                      disabled={row.locked}
+                      disabled={row.locked && !row.editing}
                       onChange={(e) => {
                         const onlyDigits5 = e.target.value
                           .replace(/\D+/g, "")
@@ -444,10 +354,12 @@ export default function PurchaseInvoice() {
                     />
                   </td>
 
+                  {/* NAME */}
                   <td>
                     <input className="pi-input" value={row.name} readOnly />
                   </td>
 
+                  {/* COST PRICE */}
                   <td>
                     <input
                       className="pi-input pi-text-right"
@@ -456,6 +368,7 @@ export default function PurchaseInvoice() {
                     />
                   </td>
 
+                  {/* QTY */}
                   <td>
                     <input
                       ref={(el) => (inputRefs.current[`qty-${row.id}`] = el)}
@@ -465,38 +378,35 @@ export default function PurchaseInvoice() {
                       type="number"
                       min={0}
                       value={row.quantity}
-                      disabled={!row.locked}
+                      disabled={!row.locked && !row.editing}
                       onChange={(e) => handleQtyChange(row.id, e.target.value)}
                       onKeyDown={(e) => handleQtyKeyDown(e, row)}
                     />
                   </td>
 
+                  {/* VENDOR */}
                   <td>
                     <select
                       ref={(el) => (inputRefs.current[`vendor-${row.id}`] = el)}
                       className={`pi-input ${row.vendorError ? "error" : ""}`}
                       value={row.vendorId}
-                      disabled={!row.locked || vendorsLoading}
-                      onChange={(e) =>
-                        handleVendorChange(row.id, e.target.value)
-                      }
+                      disabled={(!row.locked && !row.editing) || vendorsLoading}
+                      onChange={(e) => handleVendorChange(row.id, e.target.value)}
                       onKeyDown={(e) => handleVendorKeyDown(e, row)}
                     >
                       <option value="">
-                        {vendorsLoading ? "Loading vendors..." : "Select vendor"}
+                        {vendorsLoading ? "Loading..." : "Select vendor"}
                       </option>
-                      {vendors.map((v) => {
-                        const id = v._id;
-                        const name = v.companyName || "Unnamed Vendor";
-                        return (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        );
-                      })}
+
+                      {vendors.map((v) => (
+                        <option key={v._id} value={v._id}>
+                          {v.companyName || "Unnamed Vendor"}
+                        </option>
+                      ))}
                     </select>
                   </td>
 
+                  {/* TOTAL */}
                   <td>
                     <input
                       className="pi-input pi-text-right"
@@ -505,62 +415,24 @@ export default function PurchaseInvoice() {
                     />
                   </td>
 
+                  {/* ACTIONS */}
                   <td className="pi-actions-cell">
-                    <Tippy content="Add row" theme="material" delay={[150, 0]}>
+                    <Tippy content="Edit row" theme="material">
                       <button
-                        ref={(el) =>
-                          (inputRefs.current[`btn-add-${row.id}`] = el)
-                        }
-                        type="button"
-                        className="pi-icon-btn info"
-                        aria-label="Add row"
-                        onClick={() => handleAddBelow(row.id)}
-                        onKeyDown={(e) => handleAddBtnKeyDown(e, row.id)}
-                      >
-                        <FiPlus size={18} />
-                      </button>
-                    </Tippy>
-
-                    <Tippy content="Edit row" theme="material" delay={[150, 0]}>
-                      <button
-                        ref={(el) =>
-                          (inputRefs.current[`btn-edit-${row.id}`] = el)
-                        }
                         type="button"
                         className="pi-icon-btn warn"
-                        aria-label="Edit row"
                         onClick={() => editRow(row.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            editRow(row.id);
-                          }
-                        }}
                       >
                         <FiEdit2 size={18} />
                       </button>
                     </Tippy>
 
-                    <Tippy
-                      content="Remove row"
-                      theme="material"
-                      delay={[150, 0]}
-                    >
+                    <Tippy content="Delete row" theme="material">
                       <button
-                        ref={(el) =>
-                          (inputRefs.current[`btn-del-${row.id}`] = el)
-                        }
                         type="button"
                         className="pi-icon-btn danger"
                         disabled={rows.length === 1}
-                        aria-label="Remove row"
                         onClick={() => removeRow(row.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            removeRow(row.id);
-                          }
-                        }}
                       >
                         <FiTrash2 size={18} />
                       </button>
@@ -572,7 +444,7 @@ export default function PurchaseInvoice() {
           </table>
         </div>
 
-        {/* Totals */}
+        {/* TOTALS */}
         <div className="pi-totals">
           <div className="pi-totals-card">
             <div className="pi-total-row">
@@ -581,19 +453,13 @@ export default function PurchaseInvoice() {
             </div>
 
             <div className="pi-total-row">
-              <span className="label">
-                Discount <small className="pi-muted">(applies to subtotal)</small>
-              </span>
-
+              <span className="label">Discount</span>
               <input
                 className="pi-discount-input"
                 type="number"
                 min={0}
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") e.preventDefault();
-                }}
               />
             </div>
 
@@ -608,6 +474,7 @@ export default function PurchaseInvoice() {
           </div>
         </div>
 
+        {/* FOOTER */}
         <div className="pi-footer">
           <button
             type="button"
@@ -622,11 +489,9 @@ export default function PurchaseInvoice() {
             Reset
           </button>
 
-          <Tippy content="Save (Ctrl+S / Cmd+S / Alt+S)" theme="material">
-            <button type="submit" className="pi-btn">
-              Save Invoice
-            </button>
-          </Tippy>
+          <button type="submit" className="pi-btn">
+            Save Invoice
+          </button>
         </div>
       </form>
     </div>

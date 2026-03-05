@@ -1,4 +1,4 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
@@ -7,6 +7,9 @@ import "./Login.css";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import ForgotPasswordDialog from "../../components/ForgotPassword/ForgotPasswordDialog.jsx";
+import TextInput from "../../components/Form/TextInput.jsx";
+import PasswordInput from "../../components/Form/PasswordInput.jsx";
+import { FormActions } from "../../components/Form/FormActions.jsx";
 
 const LoginSchema = Yup.object({
   email: Yup.string()
@@ -37,16 +40,13 @@ export default function Login() {
                 password: values.password,
               });
 
-              // ✅ Store token + user (role included)
               login(res.data.token, res.data.user);
 
-              toast.success("Login successful.", {
-                autoClose: 2000,
-              });
+              toast.success("Login successful.", { autoClose: 2000 });
+
+              navigate("/", { replace: true });
             } catch (e) {
-              toast.error(
-                e.response?.data?.message || "Invalid email or password."
-              );
+              toast.error(e.response?.data?.message || "Invalid email or password.");
             } finally {
               setSubmitting(false);
             }
@@ -55,35 +55,21 @@ export default function Login() {
           {({ isSubmitting }) => (
             <Form>
               {/* Email */}
-              <div className="form-group">
-                <label className="label" htmlFor="email">
-                  Email
-                </label>
-                <Field
-                  id="email"
-                  name="email"
-                  type="email"
-                  className="input"
-                  autoComplete="email"
-                  inputMode="email"
-                />
-                <ErrorMessage name="email" component="div" className="message" />
-              </div>
+              <TextInput
+                name="email"
+                label="Email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+              />
 
-              {/* Password */}
+              {/* Password + Forgot Link */}
               <div className="form-group">
-                <label className="label" htmlFor="password">
-                  Password
-                </label>
-                <Field
-                  id="password"
+                <PasswordInput
                   name="password"
-                  type="password"
-                  className="input"
+                  label="Password"
                   autoComplete="current-password"
                 />
-                <ErrorMessage name="password" component="div" className="message" />
-
                 <div className="helper-row">
                   <button
                     type="button"
@@ -95,9 +81,8 @@ export default function Login() {
                 </div>
               </div>
 
-              <button className="button" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Logging in..." : "Login"}
-              </button>
+              {/* Submit */}
+              <FormActions isSubmitting={isSubmitting} label="Login" />
             </Form>
           )}
         </Formik>

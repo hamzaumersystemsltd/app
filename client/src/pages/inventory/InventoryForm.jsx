@@ -1,15 +1,19 @@
-import React, { useMemo, useEffect, useRef } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import React from "react";
+import { Formik, Form, useField } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "./AddInventory.css";
+import TextInput from "../../components/Form/TextInput.jsx";
+import CurrencyInput from "../../components/Form/CurrencyInput.jsx";
+import ImagePicker from "../../components/Form/ImagePicker.jsx";
+import FormRow from "../../components/Form/FormRow.jsx";
+import { FormActions } from "../../components/Form/FormActions.jsx";
+import FieldWrapper from "../../components/Form/FieldWrapper.jsx";
+import { currencyRegex } from "../../utils/validation.js";
 
-// ---- Shared constants/utilities (exported) ----
 export const API_BASE = "http://localhost:5000";
-export const currencyRegex = /^(?:\d+(?:\.\d{1,2})?)$/;
 
-// Async check for duplicate item code (protected route: requires token)
 export async function checkItemCodeAvailable(code, token) {
   if (!code) return true;
   try {
@@ -26,18 +30,17 @@ export async function checkItemCodeAvailable(code, token) {
   }
 }
 
-// --- Validation Schema (unchanged) ---
 export const InventorySchema = Yup.object({
   itemCode: Yup.string()
     .required("Item code is required")
     .matches(/^\d{5}$/, "Item code must be exactly 5 digits (e.g., 00001)"),
-  name: Yup.string().trim().min(2).max(100).required("Name is required"),
-  category: Yup.string().trim().min(2).max(50).required("Category is required"),
-  wsPrice: Yup.string().required().matches(currencyRegex),
-  rtPrice: Yup.string().required().matches(currencyRegex),
-  costPrice: Yup.string().required().matches(currencyRegex),
-  stockQuantity: Yup.number().typeError().integer().min(0).required(),
-  description: Yup.string().trim().max(500),
+  name: Yup.string().trim().min(2, "Min 2 characters").max(100, "Max 100 characters").required("Name is required"),
+  category: Yup.string().trim().min(2, "Min 2 characters").max(50, "Max 50 characters").required("Category is required"),
+  wsPrice: Yup.string().required("Wholesale price is required").matches(currencyRegex, "Enter a valid amount (e.g., 10.00)"),
+  rtPrice: Yup.string().required("Retail price is required").matches(currencyRegex, "Enter a valid amount (e.g., 10.00)"),
+  costPrice: Yup.string().required("Cost price is required").matches(currencyRegex, "Enter a valid amount (e.g., 10.00)"),
+  stockQuantity: Yup.number().typeError("Enter a valid number").integer("Must be an integer").min(0, "Must be ≥ 0").required("Stock is required"),
+  description: Yup.string().trim().max(500, "Max 500 characters"),
 }).test(
   "price-logic",
   "Retail should be ≥ wholesale and wholesale ≥ cost",
@@ -50,6 +53,15 @@ export const InventorySchema = Yup.object({
   }
 );
 
+function TextAreaInput({ name, label, ...props }) {
+  const [field] = useField(name);
+  return (
+    <FieldWrapper name={name} label={label}>
+      <textarea id={name} className="input" rows={3} {...field} {...props} />
+    </FieldWrapper>
+  );
+}
+
 export default function InventoryForm({
   initialValues,
   onSubmit,
@@ -59,8 +71,6 @@ export default function InventoryForm({
   token,
   existingImage = null,
 }) {
-  const fileInputRef = useRef(null);
-
   return (
     <Formik
       initialValues={initialValues}
@@ -70,150 +80,71 @@ export default function InventoryForm({
       onSubmit={onSubmit}
       enableReinitialize={enableReinitialize}
     >
-      {({ isSubmitting, setFieldValue, values, setFieldError, handleBlur }) => {
-        // Updated preview logic:
-        const previewUrl = useMemo(() => {
-          if (values.imageFile instanceof File) {
-            return URL.createObjectURL(values.imageFile);
-          }
-          if (existingImage) return existingImage;
-          return null;
-        }, [values.imageFile, existingImage]);
+      {({ isSubmitting, setFieldValue, setFieldError }) => (
+        <Form className="addinventory-form">
+          <div className="addinventory-layout">
+            {/* LEFT SIDE */}
+            <div className="form-left">
+              {/* Name */}
+              <TextInput name="name" label="Name" />
 
-        useEffect(() => {
-          return () => {
-            if (previewUrl && values.imageFile instanceof File) {
-              URL.revokeObjectURL(previewUrl);
-            }
-          };
-        }, [previewUrl, values.imageFile]);
+              {/* Row: itemCode, category, stock */}
+              <FormRow>
+                <TextInput
+                  name="itemCode"
+                  label="Item Code"
+                  maxLength={5}
+                  inputMode="numeric"
+                  onChange={(e) => {
+                    const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
+                    setFieldValue("itemCode", onlyDigits);
+                  }}
+                  onBlur={async (e) => {
+                    // Keep Formik blur behavior
+                    const v = (e.target.value || "").trim();
+                    if (!/^\d{5}$/.test(v)) return;
+                    const available = await checkItemCodeAvailable(v, token);
+                    if (!available) setFieldError("itemCode", "Item code already exists");
+                  }}
+                />
 
-        const handleImageChange = (e) => {
-          const file = e.currentTarget.files?.[0];
-          if (!file) {
-            setFieldValue("imageFile", null);
-            return;
-          }
-          if (!file.type.startsWith("image/")) {
-            setFieldError("imageFile", "Only image files are allowed");
-            return;
-          }
-          if (file.size > 5 * 1024 * 1024) {
-            setFieldError("imageFile", "Image must be ≤ 5MB");
-            return;
-          }
-          setFieldValue("imageFile", file);
-        };
+                <TextInput name="category" label="Category" />
 
-        const openFileDialog = () => fileInputRef.current?.click();
+                <TextInput
+                  name="stockQuantity"
+                  label="Stock"
+                  inputMode="numeric"
+                />
+              </FormRow>
 
-        return (
-          <Form className="addinventory-form">
-            <div className="addinventory-layout">
-              {/* LEFT SIDE */}
-              <div className="form-left">
+              {/* Prices */}
+              <FormRow>
+                <CurrencyInput name="wsPrice" label="Wholesale" />
+                <CurrencyInput name="rtPrice" label="Retail" />
+                <CurrencyInput name="costPrice" label="Cost" />
+              </FormRow>
 
-                {/* Name */}
-                <div className="form-group">
-                  <label className="label">Name</label>
-                  <Field name="name" className="input" />
-                  <ErrorMessage name="name" className="message" component="div" />
-                </div>
+              {/* Description */}
+              <TextAreaInput name="description" label="Description" />
 
-                {/* Row: itemCode, category, stock */}
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="label">Item Code</label>
-                    <Field name="itemCode">
-                      {({ field }) => (
-                        <input
-                          {...field}
-                          className="input"
-                          maxLength={5}
-                          inputMode="numeric"
-                          onChange={(e) => {
-                            const onlyDigits = e.target.value.replace(/\D+/g, "").slice(0, 5);
-                            setFieldValue("itemCode", onlyDigits);
-                          }}
-                        />
-                      )}
-                    </Field>
-                    <ErrorMessage name="itemCode" className="message" component="div" />
-                  </div>
+              {/* Submit */}
+              <FormActions isSubmitting={isSubmitting} label={submitLabel} />
+            </div>
 
-                  <div className="form-group">
-                    <label className="label">Category</label>
-                    <Field name="category" className="input" />
-                    <ErrorMessage name="category" className="message" component="div" />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="label">Stock</label>
-                    <Field name="stockQuantity" className="input" />
-                    <ErrorMessage name="stockQuantity" className="message" component="div" />
-                  </div>
-                </div>
-
-                {/* Prices */}
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="label">Wholesale</label>
-                    <Field name="wsPrice" className="input" />
-                    <ErrorMessage name="wsPrice" component="div" className="message" />
-                  </div>
-                  <div className="form-group">
-                    <label className="label">Retail</label>
-                    <Field name="rtPrice" className="input" />
-                    <ErrorMessage name="rtPrice" component="div" className="message" />
-                  </div>
-                  <div className="form-group">
-                    <label className="label">Cost</label>
-                    <Field name="costPrice" className="input" />
-                    <ErrorMessage name="costPrice" component="div" className="message" />
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div className="form-group">
-                  <label className="label">Description</label>
-                  <Field as="textarea" name="description" className="input" />
-                  <ErrorMessage name="description" className="message" component="div" />
-                </div>
-
-                {/* Submit */}
-                <button className="button" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : submitLabel}
-                </button>
-              </div>
-
-              {/* RIGHT SIDE - IMAGE */}
-              <div className="form-right">
-                <div className="image-panel">
-                  <label className="label">Product Image</label>
-
-                  {/* Hidden input */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden-file-input"
-                    onChange={handleImageChange}
-                  />
-
-                  {/* Clickable Preview */}
-                  <div className="image-preview" onClick={openFileDialog}>
-                    {previewUrl ? (
-                      <img src={previewUrl} className="preview-img" alt="Preview" />
-                    ) : (
-                      <div className="preview-placeholder">Click to upload image</div>
-                    )}
-                  </div>
-                </div>
+            {/* RIGHT SIDE - IMAGE */}
+            <div className="form-right">
+              <div className="image-panel">
+                <ImagePicker
+                  name="imageFile"
+                  label="Product Image"
+                  existingUrl={existingImage}
+                  placeholder="Click to upload image"
+                />
               </div>
             </div>
-          </Form>
-        );
-      }}
+          </div>
+        </Form>
+      )}
     </Formik>
   );
 }

@@ -1,0 +1,266 @@
+/* ===== Card container ===== */
+.si-card {
+  background: #ffffff;
+  border: 1px solid #e6e9ef;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+}
+
+/* ===== Header ===== */
+.si-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.si-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.si-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ===== Customer Section ===== */
+.customer-section {
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 18px;
+  background: #fafafb;
+}
+
+.customer-section h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.customer-section .si-input {
+  width: 100%;
+  height: 38px;
+  margin-bottom: 10px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+}
+
+.customer-section .si-input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.08);
+}
+
+/* ===== Table Wrapper ===== */
+.si-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* ===== Table ===== */
+.si-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.si-table thead th {
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.si-table tbody td {
+  padding: 14px;
+  border-top: 1px solid #f0f2f6;
+  font-size: 14px;
+  color: #111827;
+  background: #ffffff;
+}
+
+.si-table tbody tr:nth-child(even) td {
+  background: #fbfcfe;
+}
+
+/* ===== Inputs ===== */
+.si-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.si-input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
+}
+
+.si-input[readonly] {
+  background: #f7f7f7;
+  color: #6b7280;
+}
+
+.si-text-right { text-align: right; }
+.si-text-center { text-align: center; }
+
+/* ===== Input error ===== */
+.si-input.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.15);
+}
+
+/* ===== Actions cell ===== */
+.si-actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ===== Icon Buttons ===== */
+.si-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 18px;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+}
+
+.si-icon-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.si-icon-btn:active {
+  transform: translateY(1px);
+}
+
+/* Icon Variants */
+.si-icon-btn.warn {
+  color: #d97706;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.si-icon-btn.danger {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* ===== Totals Section ===== */
+.si-totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.si-totals-card {
+  width: 360px;
+  border: 1px solid #e6e9ef;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.si-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.si-discount-input {
+  width: 150px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: right;
+}
+
+.si-discount-input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.1);
+}
+
+/* ===== Footer Buttons ===== */
+.si-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  gap: 12px;
+}
+
+.si-btn {
+  padding: 10px 14px;
+  background: #111827;
+  color: #ffffff;
+  border-radius: 8px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.si-btn:hover { background: #1f2937; }
+
+.si-btn.outline {
+  background: transparent;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.si-btn.outline:hover {
+  background: #f9fafb;
+}
+
+.customer-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.customer-row .si-input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .customer-row {
+    flex-direction: column;
+  }
+}

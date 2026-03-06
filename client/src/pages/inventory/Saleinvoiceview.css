@@ -7,7 +7,7 @@
   padding: 20px;
 }
 
-/* ⭐ SINGLE ROW HEADER (UPDATED FOR DOWNLOAD PDF BUTTON) */
+/* ⭐ SINGLE ROW HEADER */
 .pi-header-row {
   display: flex;
   justify-content: space-between;
@@ -15,7 +15,7 @@
   margin-bottom: 20px;
 }
 
-/* LEFT SIDE INFO BLOCK */
+/* LEFT SIDE (Text Block) */
 .pi-header-left {
   max-width: 70%;
 }
@@ -34,14 +34,13 @@
   line-height: 1.6;
 }
 
-/* RIGHT SIDE BUTTON AREA */
+/* RIGHT SIDE (PDF Button) */
 .pi-header-right {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
 }
 
-/* ===== Download PDF Button ===== */
 .pi-btn {
   padding: 8px 16px;
   background: #111827;
@@ -51,9 +50,6 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .pi-btn:hover {
@@ -169,6 +165,7 @@
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    color: #000;
   }
 
   .pi-card {
@@ -177,9 +174,9 @@
     padding: 0 !important;
   }
 
-  /* Hide header buttons when printing */
   .pi-btn,
-  .pi-header-right {
+  .pi-header a,
+  .pi-header button {
     display: none !important;
   }
 
@@ -206,10 +203,17 @@
   .pi-table-wrap {
     border: none !important;
     border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  .pi-totals {
+    justify-content: flex-end !important;
+    margin-top: 12px !important;
   }
 
   .pi-totals-card {
     border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
     width: 320px !important;
   }
 
@@ -221,11 +225,6 @@
 
 /* ===== Mobile ===== */
 @media (max-width: 640px) {
-  .pi-header-row {
-    flex-direction: column;
-    gap: 12px;
-  }
-
   .pi-header-right {
     align-items: flex-start;
   }

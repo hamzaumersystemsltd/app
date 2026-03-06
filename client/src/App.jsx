@@ -16,6 +16,9 @@ import AddInventory from "./pages/inventory/AddInventory.jsx";
 import PurchaseInvoice from "./pages/inventory/PurchaseInvoice.jsx";
 import PurchaseInvoiceList from "./pages/inventory/PurchaseInvoiceList.jsx";
 import PurchaseInvoiceView from "./pages/inventory/PurchaseInvoiceView.jsx";
+import SaleInvoice from "./pages/inventory/SaleInvoice.jsx";
+import SaleInvoiceList from "./pages/inventory/SaleInvoiceList.jsx";
+import SaleInvoiceView from "./pages/inventory/SaleInvoiceView.jsx";
 import InventoryList from "./pages/inventory/InventoryList.jsx";
 import VendorLayout from "./pages/vendor/VendorLayout.jsx";
 import AddVendor from "./pages/vendor/AddVendor.jsx";
@@ -85,6 +88,9 @@ export default function App() {
           <Route path="purchase-invoice" element={<PurchaseInvoice />} />
           <Route path="purchase-invoices" element={<PurchaseInvoiceList />} />
           <Route path="purchase-invoices/:id" element={<PurchaseInvoiceView />} />
+          <Route path="sale-invoice" element={<SaleInvoice />} />
+          <Route path="sale-invoices" element={<SaleInvoiceList />} />
+          <Route path="sale-invoices/:id" element={<SaleInvoiceView />} />
           <Route path="inventory-list/:id/edit" element={<EditInventory />} />
           <Route path="inventory-list/:id" element={<ViewInventory />} />
         </Route>

@@ -1,7 +1,17 @@
 import mongoose from "mongoose";
-import PurchaseInvoice from "../models/PurchaseInvoice.js"
-import Item from "../models/Item.js"
-import Vendor from "../models/Vendor.js"
+import PurchaseInvoice from "../models/PurchaseInvoice.js";
+import Item from "../models/Item.js";
+import Vendor from "../models/Vendor.js";
+import Counter from "../models/PurchaseCounter.js";
+
+async function getNextInvoiceNumber() {
+  const counter = await Counter.findByIdAndUpdate(
+    { _id: "purchase_invoice" },
+    { $inc: { seq: 1 } },
+    { new: true, upsert: true }
+  );
+  return counter.seq;
+}
 
 const isObjectId = (v) => mongoose.Types.ObjectId.isValid(String(v));
 
@@ -64,32 +74,31 @@ export async function createPurchaseInvoice(req, res) {
       { companyName: 1 }
     );
 
+    // Map vendorId -> companyName (use string keys for safety)
     const vendorMap = {};
-    vendorDocs.forEach((v) => (vendorMap[v._id] = v.companyName));
+    vendorDocs.forEach((v) => (vendorMap[v._id.toString()] = v.companyName));
 
     if (vendorDocs.length !== vendorIds.length) {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
     // Compute totals
-    const itemsWithTotals = normalized.map((n) => ({
-      ...n,
-      vendorName: vendorMap[n.vendorId],
-      lineTotal: Number((n.costPrice * n.quantity).toFixed(2)),
-    }));
+    const itemsWithTotals = normalized.map((n) => {
+      const lineTotal = Number((n.costPrice * n.quantity).toFixed(2));
+      const vendorName = vendorMap[String(n.vendorId)];
+      return {
+        ...n,
+        vendorName,
+        lineTotal,
+      };
+    });
 
-    const serverSubTotal = itemsWithTotals.reduce(
-      (sum, r) => sum + r.lineTotal,
-      0
-    );
+    const serverSubTotal = itemsWithTotals.reduce((sum, r) => sum + r.lineTotal, 0);
     const safeDiscount = Math.max(Number(discount) || 0, 0);
     const serverGrand = Number((serverSubTotal - safeDiscount).toFixed(2));
 
-    // AUTO-INCREMENT INVOICE NUMBER
-    const lastInvoice = await PurchaseInvoice.findOne().sort({ invoiceNo: -1 });
-    const nextInvoiceNo = lastInvoice ? lastInvoice.invoiceNo + 1 : 1;
+    const nextInvoiceNo = await getNextInvoiceNumber();
 
-    // Save invoice
     const invoice = await PurchaseInvoice.create({
       invoiceNo: nextInvoiceNo,
       items: itemsWithTotals,
@@ -98,19 +107,21 @@ export async function createPurchaseInvoice(req, res) {
       grandTotal: serverGrand,
     });
 
-    // Increase stock
+    // Increase stock according to the items (atomic per item via $inc)
     const stockOps = itemsWithTotals.map((it) => ({
       updateOne: {
         filter: { itemCode: it.itemCode },
         update: { $inc: { stockQuantity: it.quantity } },
       },
     }));
-    await Item.bulkWrite(stockOps);
+    if (stockOps.length) {
+      await Item.bulkWrite(stockOps);
+    }
 
     return res.status(201).json({
       message: "Invoice saved",
       invoiceId: invoice._id,
-      invoiceNo: nextInvoiceNo,
+      invoiceNo: invoice.invoiceNo,
       invoice,
     });
   } catch (err) {
@@ -218,7 +229,7 @@ export async function getPurchaseInvoiceById(req, res) {
 export async function deletePurchaseInvoice(req, res) {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(String(id))) {
+    if (!isObjectId(id)) {
       return res.status(400).json({ message: "Invalid invoice id" });
     }
     const deleted = await PurchaseInvoice.findByIdAndDelete(id);

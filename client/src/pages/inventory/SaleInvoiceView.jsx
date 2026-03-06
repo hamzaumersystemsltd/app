@@ -3,19 +3,16 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
-import "./Purchaseinvoiceview.css";
+import "./Saleinvoiceview.css";
 
 const API_BASE = "http://localhost:5000";
 const CURRENCY = "PKR";
-
 const money = (n) =>
   `${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${CURRENCY}`;
-
 const fmtDate = (val) => (val ? new Date(val).toLocaleString() : "-");
 
-export default function PurchaseInvoiceView() {
+export default function SaleInvoiceView() {
   const { id } = useParams();
-
   const token = useMemo(
     () => (typeof window !== "undefined" ? localStorage.getItem("token") : null),
     []
@@ -24,14 +21,14 @@ export default function PurchaseInvoiceView() {
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ----------- TEXT-BASED PDF DOWNLOAD -----------
+  // ---------------- TEXT-BASED PDF ----------------
   const downloadPDF = () => {
     const pdf = new jsPDF({ unit: "pt", format: "a4" });
     let y = 40;
 
     pdf.setFont("Helvetica", "bold");
     pdf.setFontSize(18);
-    pdf.text(`Purchase Invoice #${invoice.invoiceNo}`, 40, y);
+    pdf.text(`Invoice #${invoice.invoiceNo}`, 40, y);
     y += 28;
 
     pdf.setFont("Helvetica", "normal");
@@ -39,33 +36,42 @@ export default function PurchaseInvoiceView() {
     pdf.text(`Created: ${fmtDate(invoice.createdAt)}`, 40, y);
     y += 16;
     pdf.text(`Updated: ${fmtDate(invoice.updatedAt)}`, 40, y);
-    y += 24;
+    y += 20;
+
+    pdf.setFont("Helvetica", "bold");
+    pdf.text(invoice.customerName || "Walk-in Customer", 40, y);
+    y += 16;
+
+    if (invoice.customerPhone) {
+      pdf.setFont("Helvetica", "normal");
+      pdf.text(invoice.customerPhone, 40, y);
+      y += 20;
+    }
 
     // Table header
     pdf.setFont("Helvetica", "bold");
     pdf.text("#", 40, y);
     pdf.text("Item Code", 70, y);
     pdf.text("Name", 150, y);
-    pdf.text("Vendor", 280, y);
-    pdf.text("Cost", 380, y);
-    pdf.text("Qty", 450, y);
-    pdf.text("Total", 500, y);
+    pdf.text("Sale Price", 320, y);
+    pdf.text("Qty", 420, y);
+    pdf.text("Total", 470, y);
     y += 14;
 
+    pdf.setLineWidth(0.5);
     pdf.line(40, y, 550, y);
     y += 14;
 
+    // Rows
     pdf.setFont("Helvetica", "normal");
 
     invoice.items.forEach((it, idx) => {
       pdf.text(String(idx + 1), 40, y);
       pdf.text(it.itemCode, 70, y);
       pdf.text(it.name, 150, y);
-      pdf.text(it.vendorName || "-", 280, y);
-      pdf.text(money(it.costPrice), 380, y);
-      pdf.text(String(it.quantity), 450, y);
-      pdf.text(money(it.lineTotal), 500, y);
-
+      pdf.text(money(it.salePrice), 320, y);
+      pdf.text(String(it.quantity), 420, y);
+      pdf.text(money(it.lineTotal), 470, y);
       y += 18;
     });
 
@@ -74,27 +80,26 @@ export default function PurchaseInvoiceView() {
     y += 20;
 
     pdf.setFont("Helvetica", "bold");
-    pdf.text("Subtotal:", 400, y);
-    pdf.text(money(invoice.subTotal), 500, y);
+    pdf.text("Subtotal:", 380, y);
+    pdf.text(money(invoice.subTotal), 470, y);
     y += 18;
 
-    pdf.text("Discount:", 400, y);
-    pdf.text(money(invoice.discount), 500, y);
+    pdf.text("Discount:", 380, y);
+    pdf.text(money(invoice.discount), 470, y);
     y += 18;
 
-    pdf.text("Grand Total:", 400, y);
-    pdf.text(money(invoice.grandTotal), 500, y);
+    pdf.text("Grand Total:", 380, y);
+    pdf.text(money(invoice.grandTotal), 470, y);
 
-    pdf.save(`Purchase-Invoice-${invoice.invoiceNo}.pdf`);
+    pdf.save(`Sale-Invoice-${invoice.invoiceNo}.pdf`);
   };
 
-  // Load invoice
+  // ---------------- LOAD INVOICE ----------------
   useEffect(() => {
     let active = true;
-
     (async () => {
       try {
-        const res = await axios.get(`${API_BASE}/api/purchases/invoices/${id}`, {
+        const res = await axios.get(`${API_BASE}/api/sales/invoices/${id}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (active) setInvoice(res.data);
@@ -104,37 +109,35 @@ export default function PurchaseInvoiceView() {
         if (active) setLoading(false);
       }
     })();
-
     return () => (active = false);
   }, [id, token]);
 
   if (loading)
     return <div className="pi-card" style={{ textAlign: "center" }}>Loading...</div>;
-
   if (!invoice)
-    return <div className="pi-card" style={{ textAlign: "center" }}>Invoice not found.</div>;
+    return <div className="pi-card" style={{ textAlign: "center" }}>Not found</div>;
 
   return (
     <div className="pi-card">
 
-      {/* --- HEADER --- */}
+      {/* ---------------- HEADER ---------------- */}
       <div className="pi-header-row">
         <div className="pi-header-left">
           <h2 className="pi-title">Invoice #{invoice.invoiceNo}</h2>
           <p className="pi-subtitle">
             Created: {fmtDate(invoice.createdAt)} <br />
-            Updated: {fmtDate(invoice.updatedAt)}
+            Updated: {fmtDate(invoice.updatedAt)} <br /><br />
+            {invoice.customerName} <br />
+            {invoice.customerPhone}
           </p>
         </div>
 
         <div className="pi-header-right">
-          <button className="pi-btn" onClick={downloadPDF}>
-            Download PDF
-          </button>
+          <button className="pi-btn" onClick={downloadPDF}>Download PDF</button>
         </div>
       </div>
 
-      {/* ITEMS TABLE */}
+      {/* ---------------- TABLE ---------------- */}
       <div className="pi-table-wrap">
         <table className="pi-table">
           <thead>
@@ -142,8 +145,7 @@ export default function PurchaseInvoiceView() {
               <th>#</th>
               <th>Item Code</th>
               <th>Name</th>
-              <th>Vendor</th>
-              <th>Cost</th>
+              <th>Sale Price</th>
               <th>Qty</th>
               <th>Total</th>
             </tr>
@@ -155,8 +157,7 @@ export default function PurchaseInvoiceView() {
                 <td className="pi-text-center">{idx + 1}</td>
                 <td className="pi-text-center">{it.itemCode}</td>
                 <td className="pi-text-center">{it.name}</td>
-                <td className="pi-text-center">{it.vendorName || "-"}</td>
-                <td className="pi-text-center">{money(it.costPrice)}</td>
+                <td className="pi-text-center">{money(it.salePrice)}</td>
                 <td className="pi-text-center">{it.quantity}</td>
                 <td className="pi-text-center">{money(it.lineTotal)}</td>
               </tr>
@@ -165,17 +166,17 @@ export default function PurchaseInvoiceView() {
         </table>
       </div>
 
-      {/* TOTALS */}
+      {/* ---------------- TOTALS ---------------- */}
       <div className="pi-totals" style={{ marginTop: 20 }}>
         <div className="pi-totals-card">
           <div className="pi-total-row">
-            <span className="label">Subtotal</span>
-            <span className="value">{money(invoice.subTotal)}</span>
+            <span>Subtotal</span>
+            <span>{money(invoice.subTotal)}</span>
           </div>
 
           <div className="pi-total-row">
-            <span className="label">Discount</span>
-            <span className="value">{money(invoice.discount)}</span>
+            <span>Discount</span>
+            <span>{money(invoice.discount)}</span>
           </div>
 
           <div className="pi-total-row">
@@ -184,6 +185,7 @@ export default function PurchaseInvoiceView() {
           </div>
         </div>
       </div>
+
     </div>
   );
 }

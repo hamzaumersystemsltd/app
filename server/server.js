@@ -8,6 +8,7 @@ import userRoutes from "./routes/users.js";
 // import adminRoutes from "./routes/adminRoutes.js";
 import connectDB from "./config/db.js";
 import purchaseInvoiceRoutes from "./routes/purchaseInvoiceRoutes.js";
+import saleInvoiceRoutes from "./routes/saleInvoiceRoutes.js";
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/inventory", inventoryRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/purchases", purchaseInvoiceRoutes);
+app.use("/api/sales", saleInvoiceRoutes);
 // app.use("/api/admin", adminRoutes);
 
 // Server start
